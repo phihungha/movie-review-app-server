@@ -1,7 +1,8 @@
 node_modules/
 dist/
 
+*.md
 .gitignore
-.eslintcache
 .dockerignore
 .env
+.eslintcache
