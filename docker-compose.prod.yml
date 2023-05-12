@@ -1,0 +1,11 @@
+services:
+  apollo-api-server:
+    restart: always
+    env_file:
+      - .env
+    command: npm start
+
+  postgres-db:
+    restart: always
+    env_file:
+      - .env

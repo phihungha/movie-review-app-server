@@ -1,0 +1,24 @@
+services:
+  apollo-api-server:
+    container_name: mra-apollo-api-server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - ${SERVER_PORT:-3000}:${SERVER_PORT:-3000}
+    environment:
+      - SERVER_PORT=${SERVER_PORT:-3000}
+    depends_on:
+      - postgres-db
+
+  postgres-db:
+    container_name: mra-postgres-db
+    image: postgres:15
+    ports:
+      - 5432:5432
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:
+    name: ${VOLUME_NAME:-mra-db-data}
