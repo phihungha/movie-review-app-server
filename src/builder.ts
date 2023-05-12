@@ -3,10 +3,24 @@ import RelayPlugin from '@pothos/plugin-relay';
 import ScopeAuthPlugin from '@pothos/plugin-scope-auth';
 import ErrorsPlugin from '@pothos/plugin-errors';
 import ValidationPlugin from '@pothos/plugin-validation';
+import { PrismaClient } from '@prisma/client';
+import PrismaPlugin from '@pothos/plugin-prisma';
+import type PrismaTypes from '@pothos/plugin-prisma/generated';
 import { Context } from './types';
 
-export const schemaBuilder = new SchemaBuilder<{ Context: Context }>({
-  plugins: [RelayPlugin, ScopeAuthPlugin, ErrorsPlugin, ValidationPlugin],
+const prismaClient = new PrismaClient({});
+
+export const schemaBuilder = new SchemaBuilder<{
+  Context: Context;
+  PrismaTypes: PrismaTypes;
+}>({
+  plugins: [
+    RelayPlugin,
+    ScopeAuthPlugin,
+    ErrorsPlugin,
+    ValidationPlugin,
+    PrismaPlugin,
+  ],
   relayOptions: {
     clientMutationId: 'omit',
     cursorType: 'ID',
@@ -16,5 +30,9 @@ export const schemaBuilder = new SchemaBuilder<{ Context: Context }>({
   }),
   errorOptions: {
     defaultTypes: [],
+  },
+  prisma: {
+    client: prismaClient,
+    filterConnectionTotalCount: true,
   },
 });
