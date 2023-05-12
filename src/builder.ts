@@ -8,7 +8,7 @@ import PrismaPlugin from '@pothos/plugin-prisma';
 import type PrismaTypes from '@pothos/plugin-prisma/generated';
 import { Context } from './types';
 
-const prismaClient = new PrismaClient({});
+export const prismaClient = new PrismaClient({});
 
 export const schemaBuilder = new SchemaBuilder<{
   Context: Context;
