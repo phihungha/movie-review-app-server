@@ -33,15 +33,6 @@
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.0.4"
   },
-  "lint-staged": {
-    "*.{ts,js}": [
-      "prettier -w",
-      "eslint --fix --cache"
-    ],
-    "*.{json,md}": [
-      "prettier -w"
-    ]
-  },
   "dependencies": {
     "@apollo/server": "^4.7.1",
     "@pothos/core": "^3.30.0",
@@ -50,8 +41,19 @@
     "@pothos/plugin-relay": "^3.43.0",
     "@pothos/plugin-scope-auth": "^3.19.1",
     "@pothos/plugin-validation": "^3.9.1",
+    "bcrypt": "^5.1.0",
     "dotenv": "^16.0.3",
     "graphql": "^16.6.0",
+    "jsonwebtoken": "^9.0.0",
     "zod": "^3.21.4"
+  },
+  "lint-staged": {
+    "*.{ts,js}": [
+      "prettier -w",
+      "eslint --fix --cache"
+    ],
+    "*.{json,md,yml}": [
+      "prettier -w"
+    ]
   }
 }
