@@ -1,0 +1,8 @@
+node_modules/
+dist/
+
+*.md
+.gitignore
+.dockerignore
+.env
+.eslintcache

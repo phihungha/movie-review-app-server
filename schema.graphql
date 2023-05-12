@@ -1,0 +1,7 @@
+type Error {
+  message: String!
+}
+
+type Query {
+  ok: Boolean!
+}
