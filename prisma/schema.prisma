@@ -15,7 +15,152 @@ datasource db {
 }
 
 model User {
-  id             Int    @id @default(autoincrement())
-  username       String
+  id             Int          @id @default(autoincrement())
+  username       String       @unique
+  avatarUrl      String?
+  email          String       @unique
   hashedPassword String
+  name           String
+  userType       UserType
+  gender         Gender?
+  dateOfBirth    DateTime?
+  criticUser     CriticUser?
+  regularUser    RegularUser?
+
+  reviews          Review[]     @relation(name: "review-author")
+  reviewThanks     Review[]     @relation(name: "review-thank")
+  comments         Comment[]    @relation(name: "comment-author")
+  viewedMovies     Movie[]
+  collections      Collection[] @relation(name: "collection-author")
+  likedCollections Collection[] @relation(name: "collection-like")
+}
+
+enum UserType {
+  Regular
+  Critic
+}
+
+enum Gender {
+  Male
+  Female
+  Other
+}
+
+model RegularUser {
+  user User @relation(fields: [id], references: [id])
+  id   Int  @id
+}
+
+model CriticUser {
+  user    User   @relation(fields: [id], references: [id])
+  id      Int    @id
+  blogUrl String
+}
+
+model Genre {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  movies Movie[]
+}
+
+model Company {
+  id                Int     @id @default(autoincrement())
+  name              String  @unique
+  producedMovies    Movie[] @relation(name: "production-company")
+  distributedMovies Movie[] @relation(name: "distribution-company")
+}
+
+model CrewMember {
+  id             Int            @id @default(autoincrement())
+  name           String
+  avatarUrl      String?
+  directedMovies Movie[]        @relation(name: "director")
+  writtenMovies  Movie[]        @relation(name: "writer")
+  dopMovies      Movie[]        @relation(name: "dop")
+  scoredMovies   Movie[]        @relation(name: "composer")
+  editedMovies   Movie[]        @relation(name: "editor")
+  actedMovies    ActingCredit[]
+}
+
+model ActingCredit {
+  crew          CrewMember @relation(fields: [crewId], references: [id])
+  crewId        Int
+  movie         Movie      @relation(fields: [movieId], references: [id])
+  movieId       Int
+  characterName String
+
+  @@id([crewId, movieId])
+}
+
+model Movie {
+  id                    Int       @id @default(autoincrement())
+  title                 String
+  posterUrl             String?
+  releaseDate           DateTime
+  genres                Genre[]
+  productionCompanies   Company[] @relation(name: "production-company")
+  distributionCompanies Company[] @relation(name: "distribution-company")
+
+  directors CrewMember[]   @relation(name: "director")
+  writers   CrewMember[]   @relation(name: "writer")
+  dops      CrewMember[]   @relation(name: "dop")
+  editors   CrewMember[]   @relation(name: "editor")
+  composers CrewMember[]   @relation(name: "composer")
+  actors    ActingCredit[]
+
+  reviews           Review[]
+  userScore         Float?
+  userReviewCount   Int          @default(0)
+  criticScore       Float?
+  criticReviewCount Int          @default(0)
+  viewedUsers       User[]
+  viewedUserCount   Int          @default(0)
+  collections       Collection[]
+}
+
+model Review {
+  id         Int      @id @default(autoincrement())
+  author     User     @relation(name: "review-author", fields: [authorId], references: [id])
+  authorId   Int
+  authorType UserType
+  movie      Movie    @relation(fields: [movieId], references: [id])
+  movieId    Int
+
+  title    String
+  postTime DateTime @default(now())
+  score    Int
+  content  String
+
+  thankUsers   User[]    @relation(name: "review-thank")
+  thankCount   Int       @default(0)
+  comments     Comment[] @relation
+  commentCount Int       @default(0)
+}
+
+model Comment {
+  id       Int    @id @default(autoincrement())
+  author   User   @relation(name: "comment-author", fields: [authorId], references: [id])
+  authorId Int
+  review   Review @relation(fields: [reviewId], references: [id])
+  reviewId Int
+
+  title          String
+  postTime       DateTime  @default(now())
+  lastUpdateTime DateTime?
+  content        String
+}
+
+model Collection {
+  id       Int  @id @default(autoincrement())
+  author   User @relation(name: "collection-author", fields: [authorId], references: [id])
+  authorId Int
+
+  name           String
+  creationTime   DateTime  @default(now())
+  lastUpdateTime DateTime?
+
+  movies Movie[]
+
+  likeUsers User[] @relation(name: "collection-like")
+  likeCount Int    @default(0)
 }
