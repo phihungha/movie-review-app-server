@@ -93,6 +93,7 @@ CREATE TABLE "Review" (
     "postTime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "score" INTEGER NOT NULL,
     "content" TEXT NOT NULL,
+    "externalUrl" TEXT,
     "thankCount" INTEGER NOT NULL DEFAULT 0,
     "commentCount" INTEGER NOT NULL DEFAULT 0,
 
@@ -119,6 +120,7 @@ CREATE TABLE "Collection" (
     "name" TEXT NOT NULL,
     "creationTime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "lastUpdateTime" TIMESTAMP(3),
+    "likeCount" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "Collection_pkey" PRIMARY KEY ("id")
 );
