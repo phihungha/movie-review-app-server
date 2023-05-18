@@ -145,7 +145,6 @@ model Comment {
   review   Review @relation(fields: [reviewId], references: [id])
   reviewId Int
 
-  title          String
   postTime       DateTime  @default(now())
   lastUpdateTime DateTime?
   content        String

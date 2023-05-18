@@ -105,7 +105,6 @@ CREATE TABLE "Comment" (
     "id" SERIAL NOT NULL,
     "authorId" INTEGER NOT NULL,
     "reviewId" INTEGER NOT NULL,
-    "title" TEXT NOT NULL,
     "postTime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "lastUpdateTime" TIMESTAMP(3),
     "content" TEXT NOT NULL,
