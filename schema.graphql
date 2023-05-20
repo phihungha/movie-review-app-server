@@ -126,6 +126,12 @@ type Error {
   message: String!
 }
 
+enum Gender {
+  Female
+  Male
+  Other
+}
+
 type Genre implements Node {
   id: ID!
   movies(after: ID, before: ID, first: Int, last: Int): GenreMoviesConnection!
@@ -294,7 +300,7 @@ type Query {
 
 type Review implements Node {
   author: User!
-  authorType: String!
+  authorType: UserType!
   commentCount: Int!
   comments(after: ID, before: ID, first: Int, last: Int): ReviewCommentsConnection!
   content: String!
@@ -331,11 +337,13 @@ type User implements Node {
   avatarUrl: String
   collections(after: ID, before: ID, first: Int, last: Int): UserCollectionsConnection!
   comments(after: ID, before: ID, first: Int, last: Int): UserCommentsConnection!
+  gender: Gender
   id: ID!
   likedCollections(after: ID, before: ID, first: Int, last: Int): UserLikedCollectionsConnection!
   name: String!
   reviewThanks(after: ID, before: ID, first: Int, last: Int): UserReviewThanksConnection!
   reviews(after: ID, before: ID, first: Int, last: Int): UserReviewsConnection!
+  userType: UserType!
   username: String!
   viewedMovies(after: ID, before: ID, first: Int, last: Int): UserViewedMoviesConnection!
 }
@@ -388,6 +396,11 @@ type UserReviewsConnection {
 type UserReviewsConnectionEdge {
   cursor: ID!
   node: Review!
+}
+
+enum UserType {
+  Critic
+  Regular
 }
 
 type UserViewedMoviesConnection {

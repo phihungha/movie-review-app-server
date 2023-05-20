@@ -2,6 +2,8 @@ import { lexicographicSortSchema, printSchema } from 'graphql';
 import { schemaBuilder } from '../builder';
 import { writeFileSync } from 'fs';
 import './error';
+import './gender';
+import './userType';
 import './genre';
 import './crew-member';
 import './company';

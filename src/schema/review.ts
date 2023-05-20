@@ -1,3 +1,4 @@
+import { UserType } from '@prisma/client';
 import { schemaBuilder } from '../builder';
 
 schemaBuilder.prismaNode('Review', {
@@ -5,7 +6,10 @@ schemaBuilder.prismaNode('Review', {
   fields: (t) => ({
     author: t.relation('author'),
     movie: t.relation('movie'),
-    authorType: t.exposeString('authorType'),
+    authorType: t.field({
+      type: UserType,
+      resolve: (parent) => parent.authorType,
+    }),
     title: t.exposeString('title'),
     content: t.exposeString('content'),
     score: t.exposeInt('score'),
