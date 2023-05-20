@@ -174,7 +174,7 @@ async function main() {
       dops: { connect: [{ id: hoytemaDop.id }] },
       editors: { connect: [{ id: lameEditor.id }] },
       composers: { connect: [{ id: goranssonComposer.id }] },
-      actors: {
+      actingCredits: {
         createMany: {
           data: [
             { crewId: washingtonActor.id, characterName: 'Protagonist' },
@@ -227,7 +227,7 @@ async function main() {
       dops: { connect: [{ id: fraserDop.id }] },
       editors: { connect: [{ id: walkerEditor.id }] },
       composers: { connect: [{ id: zimmerComposer.id }] },
-      actors: {
+      actingCredits: {
         createMany: {
           data: [
             { crewId: chalametActor.id, characterName: 'Paul Atreides' },

@@ -19,6 +19,7 @@ schemaBuilder.prismaNode('Movie', {
     dops: t.relation('dops'),
     editors: t.relation('editors'),
     composers: t.relation('composers'),
+    actingCredits: t.relation('actingCredits'),
 
     reviews: t.relatedConnection('reviews', { cursor: 'id' }),
     userScore: t.exposeFloat('userScore', { nullable: true }),

@@ -102,12 +102,12 @@ model Movie {
   productionCompanies   Company[] @relation(name: "production-company")
   distributionCompanies Company[] @relation(name: "distribution-company")
 
-  directors CrewMember[]   @relation(name: "director")
-  writers   CrewMember[]   @relation(name: "writer")
-  dops      CrewMember[]   @relation(name: "dop")
-  editors   CrewMember[]   @relation(name: "editor")
-  composers CrewMember[]   @relation(name: "composer")
-  actors    ActingCredit[]
+  directors     CrewMember[]   @relation(name: "director")
+  writers       CrewMember[]   @relation(name: "writer")
+  dops          CrewMember[]   @relation(name: "dop")
+  editors       CrewMember[]   @relation(name: "editor")
+  composers     CrewMember[]   @relation(name: "composer")
+  actingCredits ActingCredit[]
 
   reviews           Review[]
   userScore         Float?
