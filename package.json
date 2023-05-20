@@ -60,7 +60,7 @@
       "prettier -w",
       "eslint --fix --cache"
     ],
-    "*.{json,md,yml}": [
+    "*.{json,md,yml,graphql}": [
       "prettier -w"
     ]
   }
