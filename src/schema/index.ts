@@ -1,5 +1,5 @@
 import { lexicographicSortSchema, printSchema } from 'graphql';
-import { schemaBuilder } from '../builder';
+import { schemaBuilder } from '../schema-builder';
 import { writeFileSync } from 'fs';
 import './error';
 import './enums';

@@ -1,4 +1,4 @@
-import { schemaBuilder } from '../builder';
+import { schemaBuilder } from '../schema-builder';
 import { prismaClient } from '../prisma-client';
 
 schemaBuilder.prismaNode('Movie', {

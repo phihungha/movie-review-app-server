@@ -1,4 +1,4 @@
-import { schemaBuilder } from '../builder';
+import { schemaBuilder } from '../schema-builder';
 import { Gender, UserType } from '@prisma/client';
 
 schemaBuilder.prismaNode('User', {

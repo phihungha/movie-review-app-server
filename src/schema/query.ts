@@ -1,4 +1,4 @@
-import { schemaBuilder } from '../builder';
+import { schemaBuilder } from '../schema-builder';
 
 export const queryType = schemaBuilder.queryType({
   fields: (t) => ({

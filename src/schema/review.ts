@@ -1,5 +1,5 @@
 import { UserType } from '@prisma/client';
-import { schemaBuilder } from '../builder';
+import { schemaBuilder } from '../schema-builder';
 
 schemaBuilder.prismaNode('Review', {
   id: { field: 'id' },

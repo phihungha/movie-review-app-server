@@ -1,4 +1,4 @@
-import { schemaBuilder } from '../builder';
+import { schemaBuilder } from '../schema-builder';
 
 schemaBuilder.prismaNode('CrewMember', {
   id: { field: 'id' },
