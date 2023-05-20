@@ -1,7 +1,401 @@
+type Collection implements Node {
+  author: User!
+  id: ID!
+  likeCount: Int!
+  likeUsers(after: ID, before: ID, first: Int, last: Int): CollectionLikeUsersConnection!
+  movies(after: ID, before: ID, first: Int, last: Int): CollectionMoviesConnection!
+  name: String!
+}
+
+type CollectionLikeUsersConnection {
+  edges: [CollectionLikeUsersConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type CollectionLikeUsersConnectionEdge {
+  cursor: ID!
+  node: User!
+}
+
+type CollectionMoviesConnection {
+  edges: [CollectionMoviesConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type CollectionMoviesConnectionEdge {
+  cursor: ID!
+  node: Movie!
+}
+
+type Comment implements Node {
+  author: User!
+  content: String!
+  id: ID!
+  review: Review!
+}
+
+type Company implements Node {
+  distributedMovies(after: ID, before: ID, first: Int, last: Int): CompanyDistributedMoviesConnection!
+  id: ID!
+  name: String!
+  producedMovies(after: ID, before: ID, first: Int, last: Int): CompanyProducedMoviesConnection!
+}
+
+type CompanyDistributedMoviesConnection {
+  edges: [CompanyDistributedMoviesConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type CompanyDistributedMoviesConnectionEdge {
+  cursor: ID!
+  node: Movie!
+}
+
+type CompanyProducedMoviesConnection {
+  edges: [CompanyProducedMoviesConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type CompanyProducedMoviesConnectionEdge {
+  cursor: ID!
+  node: Movie!
+}
+
+type CrewMember implements Node {
+  avatarUrl: String
+  directedMovies(after: ID, before: ID, first: Int, last: Int): CrewMemberDirectedMoviesConnection!
+  dopMovies(after: ID, before: ID, first: Int, last: Int): CrewMemberDopMoviesConnection!
+  editedMovies(after: ID, before: ID, first: Int, last: Int): CrewMemberEditedMoviesConnection!
+  id: ID!
+  name: String!
+  scoredMovies(after: ID, before: ID, first: Int, last: Int): CrewMemberScoredMoviesConnection!
+  writtenMovies(after: ID, before: ID, first: Int, last: Int): CrewMemberWrittenMoviesConnection!
+}
+
+type CrewMemberDirectedMoviesConnection {
+  edges: [CrewMemberDirectedMoviesConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type CrewMemberDirectedMoviesConnectionEdge {
+  cursor: ID!
+  node: Movie!
+}
+
+type CrewMemberDopMoviesConnection {
+  edges: [CrewMemberDopMoviesConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type CrewMemberDopMoviesConnectionEdge {
+  cursor: ID!
+  node: Movie!
+}
+
+type CrewMemberEditedMoviesConnection {
+  edges: [CrewMemberEditedMoviesConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type CrewMemberEditedMoviesConnectionEdge {
+  cursor: ID!
+  node: Movie!
+}
+
+type CrewMemberScoredMoviesConnection {
+  edges: [CrewMemberScoredMoviesConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type CrewMemberScoredMoviesConnectionEdge {
+  cursor: ID!
+  node: Movie!
+}
+
+type CrewMemberWrittenMoviesConnection {
+  edges: [CrewMemberWrittenMoviesConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type CrewMemberWrittenMoviesConnectionEdge {
+  cursor: ID!
+  node: Movie!
+}
+
 type Error {
   message: String!
 }
 
+type Genre implements Node {
+  id: ID!
+  movies(after: ID, before: ID, first: Int, last: Int): GenreMoviesConnection!
+  name: String!
+}
+
+type GenreMoviesConnection {
+  edges: [GenreMoviesConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type GenreMoviesConnectionEdge {
+  cursor: ID!
+  node: Movie!
+}
+
+type Movie implements Node {
+  collections(after: ID, before: ID, first: Int, last: Int): MovieCollectionsConnection!
+  composers(after: ID, before: ID, first: Int, last: Int): MovieComposersConnection!
+  criticReviewCount: Int!
+  criticScore: Float
+  directors(after: ID, before: ID, first: Int, last: Int): MovieDirectorsConnection!
+  distributedCompanies(after: ID, before: ID, first: Int, last: Int): MovieDistributedCompaniesConnection!
+  dops(after: ID, before: ID, first: Int, last: Int): MovieDopsConnection!
+  editors(after: ID, before: ID, first: Int, last: Int): MovieEditorsConnection!
+  genres(after: ID, before: ID, first: Int, last: Int): MovieGenresConnection!
+  id: ID!
+  posterUrl: String
+  productionCompanies(after: ID, before: ID, first: Int, last: Int): MovieProductionCompaniesConnection!
+  reviews(after: ID, before: ID, first: Int, last: Int): MovieReviewsConnection!
+  runningTime: Int!
+  title: String!
+  userReviewCount: Int!
+  userScore: Float
+  viewedUserCount: Int!
+  viewedUsers(after: ID, before: ID, first: Int, last: Int): MovieViewedUsersConnection!
+  writers(after: ID, before: ID, first: Int, last: Int): MovieWritersConnection!
+}
+
+type MovieCollectionsConnection {
+  edges: [MovieCollectionsConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type MovieCollectionsConnectionEdge {
+  cursor: ID!
+  node: Collection!
+}
+
+type MovieComposersConnection {
+  edges: [MovieComposersConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type MovieComposersConnectionEdge {
+  cursor: ID!
+  node: CrewMember!
+}
+
+type MovieDirectorsConnection {
+  edges: [MovieDirectorsConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type MovieDirectorsConnectionEdge {
+  cursor: ID!
+  node: CrewMember!
+}
+
+type MovieDistributedCompaniesConnection {
+  edges: [MovieDistributedCompaniesConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type MovieDistributedCompaniesConnectionEdge {
+  cursor: ID!
+  node: Company!
+}
+
+type MovieDopsConnection {
+  edges: [MovieDopsConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type MovieDopsConnectionEdge {
+  cursor: ID!
+  node: CrewMember!
+}
+
+type MovieEditorsConnection {
+  edges: [MovieEditorsConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type MovieEditorsConnectionEdge {
+  cursor: ID!
+  node: CrewMember!
+}
+
+type MovieGenresConnection {
+  edges: [MovieGenresConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type MovieGenresConnectionEdge {
+  cursor: ID!
+  node: Genre!
+}
+
+type MovieProductionCompaniesConnection {
+  edges: [MovieProductionCompaniesConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type MovieProductionCompaniesConnectionEdge {
+  cursor: ID!
+  node: Company!
+}
+
+type MovieReviewsConnection {
+  edges: [MovieReviewsConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type MovieReviewsConnectionEdge {
+  cursor: ID!
+  node: Review!
+}
+
+type MovieViewedUsersConnection {
+  edges: [MovieViewedUsersConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type MovieViewedUsersConnectionEdge {
+  cursor: ID!
+  node: User!
+}
+
+type MovieWritersConnection {
+  edges: [MovieWritersConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type MovieWritersConnectionEdge {
+  cursor: ID!
+  node: CrewMember!
+}
+
+interface Node {
+  id: ID!
+}
+
+type PageInfo {
+  endCursor: ID
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: ID
+}
+
 type Query {
+  node(id: ID!): Node
+  nodes(ids: [ID!]!): [Node]!
   ok: Boolean!
+}
+
+type Review implements Node {
+  author: User!
+  authorType: String!
+  commentCount: Int!
+  comments(after: ID, before: ID, first: Int, last: Int): ReviewCommentsConnection!
+  content: String!
+  externalUrl: String
+  id: ID!
+  movie: Movie!
+  score: Int!
+  thankCount: Int!
+  thankUsers(after: ID, before: ID, first: Int, last: Int): ReviewThankUsersConnection!
+  title: String!
+}
+
+type ReviewCommentsConnection {
+  edges: [ReviewCommentsConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type ReviewCommentsConnectionEdge {
+  cursor: ID!
+  node: Comment!
+}
+
+type ReviewThankUsersConnection {
+  edges: [ReviewThankUsersConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type ReviewThankUsersConnectionEdge {
+  cursor: ID!
+  node: User!
+}
+
+type User implements Node {
+  avatarUrl: String
+  collections(after: ID, before: ID, first: Int, last: Int): UserCollectionsConnection!
+  comments(after: ID, before: ID, first: Int, last: Int): UserCommentsConnection!
+  id: ID!
+  likedCollections(after: ID, before: ID, first: Int, last: Int): UserLikedCollectionsConnection!
+  name: String!
+  reviewThanks(after: ID, before: ID, first: Int, last: Int): UserReviewThanksConnection!
+  reviews(after: ID, before: ID, first: Int, last: Int): UserReviewsConnection!
+  username: String!
+  viewedMovies(after: ID, before: ID, first: Int, last: Int): UserViewedMoviesConnection!
+}
+
+type UserCollectionsConnection {
+  edges: [UserCollectionsConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type UserCollectionsConnectionEdge {
+  cursor: ID!
+  node: Collection!
+}
+
+type UserCommentsConnection {
+  edges: [UserCommentsConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type UserCommentsConnectionEdge {
+  cursor: ID!
+  node: Comment!
+}
+
+type UserLikedCollectionsConnection {
+  edges: [UserLikedCollectionsConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type UserLikedCollectionsConnectionEdge {
+  cursor: ID!
+  node: Collection!
+}
+
+type UserReviewThanksConnection {
+  edges: [UserReviewThanksConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type UserReviewThanksConnectionEdge {
+  cursor: ID!
+  node: Review!
+}
+
+type UserReviewsConnection {
+  edges: [UserReviewsConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type UserReviewsConnectionEdge {
+  cursor: ID!
+  node: Review!
+}
+
+type UserViewedMoviesConnection {
+  edges: [UserViewedMoviesConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type UserViewedMoviesConnectionEdge {
+  cursor: ID!
+  node: Movie!
 }
