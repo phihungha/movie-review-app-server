@@ -157,6 +157,7 @@ async function main() {
       posterUrl:
         'https://m.media-amazon.com/images/I/91oMmAPaaeL._AC_SL1500_.jpg',
       releaseDate: new Date(2020, 9, 3),
+      runningTime: 9000,
       genres: {
         connect: [{ name: 'Sci-Fi' }, { name: 'Action' }, { name: 'Thriller' }],
       },
@@ -207,6 +208,7 @@ async function main() {
       posterUrl:
         'https://m.media-amazon.com/images/I/51URKHWYfnL._AC_SL1024_.jpg',
       releaseDate: new Date(2021, 10, 22),
+      runningTime: 9360,
       genres: {
         connect: [{ name: 'Sci-Fi' }, { name: 'Drama' }],
       },

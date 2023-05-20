@@ -97,6 +97,7 @@ model Movie {
   title                 String
   posterUrl             String?
   releaseDate           DateTime
+  runningTime           Int
   genres                Genre[]
   productionCompanies   Company[] @relation(name: "production-company")
   distributionCompanies Company[] @relation(name: "distribution-company")
