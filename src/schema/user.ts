@@ -16,6 +16,7 @@ schemaBuilder.prismaNode('User', {
       type: UserType,
       resolve: (parent) => parent.userType,
     }),
+
     reviews: t.relatedConnection('reviews', { cursor: 'id' }),
     reviewThanks: t.relatedConnection('reviewThanks', { cursor: 'id' }),
     comments: t.relatedConnection('comments', { cursor: 'id' }),

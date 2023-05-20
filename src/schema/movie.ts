@@ -6,19 +6,15 @@ schemaBuilder.prismaNode('Movie', {
     title: t.exposeString('title'),
     posterUrl: t.exposeString('posterUrl', { nullable: true }),
     runningTime: t.exposeInt('runningTime'),
-    genres: t.relatedConnection('genres', { cursor: 'id' }),
-    productionCompanies: t.relatedConnection('productionCompanies', {
-      cursor: 'id',
-    }),
-    distributedCompanies: t.relatedConnection('distributionCompanies', {
-      cursor: 'id',
-    }),
+    genres: t.relation('genres'),
+    productionCompanies: t.relation('productionCompanies'),
+    distributedCompanies: t.relation('distributionCompanies'),
 
-    directors: t.relatedConnection('directors', { cursor: 'id' }),
-    writers: t.relatedConnection('writers', { cursor: 'id' }),
-    dops: t.relatedConnection('dops', { cursor: 'id' }),
-    editors: t.relatedConnection('editors', { cursor: 'id' }),
-    composers: t.relatedConnection('composers', { cursor: 'id' }),
+    directors: t.relation('directors'),
+    writers: t.relation('writers'),
+    dops: t.relation('dops'),
+    editors: t.relation('editors'),
+    composers: t.relation('composers'),
 
     reviews: t.relatedConnection('reviews', { cursor: 'id' }),
     userScore: t.exposeFloat('userScore', { nullable: true }),

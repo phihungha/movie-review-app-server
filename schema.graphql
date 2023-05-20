@@ -150,17 +150,17 @@ type GenreMoviesConnectionEdge {
 
 type Movie implements Node {
   collections(after: ID, before: ID, first: Int, last: Int): MovieCollectionsConnection!
-  composers(after: ID, before: ID, first: Int, last: Int): MovieComposersConnection!
+  composers: [CrewMember!]!
   criticReviewCount: Int!
   criticScore: Float
-  directors(after: ID, before: ID, first: Int, last: Int): MovieDirectorsConnection!
-  distributedCompanies(after: ID, before: ID, first: Int, last: Int): MovieDistributedCompaniesConnection!
-  dops(after: ID, before: ID, first: Int, last: Int): MovieDopsConnection!
-  editors(after: ID, before: ID, first: Int, last: Int): MovieEditorsConnection!
-  genres(after: ID, before: ID, first: Int, last: Int): MovieGenresConnection!
+  directors: [CrewMember!]!
+  distributedCompanies: [Company!]!
+  dops: [CrewMember!]!
+  editors: [CrewMember!]!
+  genres: [Genre!]!
   id: ID!
   posterUrl: String
-  productionCompanies(after: ID, before: ID, first: Int, last: Int): MovieProductionCompaniesConnection!
+  productionCompanies: [Company!]!
   reviews(after: ID, before: ID, first: Int, last: Int): MovieReviewsConnection!
   runningTime: Int!
   title: String!
@@ -168,7 +168,7 @@ type Movie implements Node {
   userScore: Float
   viewedUserCount: Int!
   viewedUsers(after: ID, before: ID, first: Int, last: Int): MovieViewedUsersConnection!
-  writers(after: ID, before: ID, first: Int, last: Int): MovieWritersConnection!
+  writers: [CrewMember!]!
 }
 
 type MovieCollectionsConnection {
@@ -179,76 +179,6 @@ type MovieCollectionsConnection {
 type MovieCollectionsConnectionEdge {
   cursor: ID!
   node: Collection!
-}
-
-type MovieComposersConnection {
-  edges: [MovieComposersConnectionEdge]!
-  pageInfo: PageInfo!
-}
-
-type MovieComposersConnectionEdge {
-  cursor: ID!
-  node: CrewMember!
-}
-
-type MovieDirectorsConnection {
-  edges: [MovieDirectorsConnectionEdge]!
-  pageInfo: PageInfo!
-}
-
-type MovieDirectorsConnectionEdge {
-  cursor: ID!
-  node: CrewMember!
-}
-
-type MovieDistributedCompaniesConnection {
-  edges: [MovieDistributedCompaniesConnectionEdge]!
-  pageInfo: PageInfo!
-}
-
-type MovieDistributedCompaniesConnectionEdge {
-  cursor: ID!
-  node: Company!
-}
-
-type MovieDopsConnection {
-  edges: [MovieDopsConnectionEdge]!
-  pageInfo: PageInfo!
-}
-
-type MovieDopsConnectionEdge {
-  cursor: ID!
-  node: CrewMember!
-}
-
-type MovieEditorsConnection {
-  edges: [MovieEditorsConnectionEdge]!
-  pageInfo: PageInfo!
-}
-
-type MovieEditorsConnectionEdge {
-  cursor: ID!
-  node: CrewMember!
-}
-
-type MovieGenresConnection {
-  edges: [MovieGenresConnectionEdge]!
-  pageInfo: PageInfo!
-}
-
-type MovieGenresConnectionEdge {
-  cursor: ID!
-  node: Genre!
-}
-
-type MovieProductionCompaniesConnection {
-  edges: [MovieProductionCompaniesConnectionEdge]!
-  pageInfo: PageInfo!
-}
-
-type MovieProductionCompaniesConnectionEdge {
-  cursor: ID!
-  node: Company!
 }
 
 type MovieReviewsConnection {
@@ -269,16 +199,6 @@ type MovieViewedUsersConnection {
 type MovieViewedUsersConnectionEdge {
   cursor: ID!
   node: User!
-}
-
-type MovieWritersConnection {
-  edges: [MovieWritersConnectionEdge]!
-  pageInfo: PageInfo!
-}
-
-type MovieWritersConnectionEdge {
-  cursor: ID!
-  node: CrewMember!
 }
 
 interface Node {
