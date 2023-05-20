@@ -5,6 +5,10 @@ schemaBuilder.prismaNode('Movie', {
   fields: (t) => ({
     title: t.exposeString('title'),
     posterUrl: t.exposeString('posterUrl', { nullable: true }),
+    releaseDate: t.field({
+      type: 'DateTime',
+      resolve: (parent) => parent.releaseDate,
+    }),
     runningTime: t.exposeInt('runningTime'),
     genres: t.relation('genres'),
     productionCompanies: t.relation('productionCompanies'),

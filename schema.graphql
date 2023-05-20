@@ -1,6 +1,8 @@
 type Collection implements Node {
   author: User!
+  creationTime: DateTime!
   id: ID!
+  lastUpdateTime: DateTime
   likeCount: Int!
   likeUsers(
     after: ID
@@ -41,6 +43,8 @@ type Comment implements Node {
   author: User!
   content: String!
   id: ID!
+  lastUpdateTime: DateTime
+  postTime: DateTime!
   review: Review!
 }
 
@@ -167,6 +171,11 @@ type CrewMemberWrittenMoviesConnectionEdge {
   node: Movie!
 }
 
+"""
+A local date-time string (i.e., with no associated timezone) in `YYYY-MM-DDTHH:mm:ss` format, e.g. `2020-01-01T00:00:00`.
+"""
+scalar DateTime
+
 type Error {
   message: String!
 }
@@ -211,6 +220,7 @@ type Movie implements Node {
   id: ID!
   posterUrl: String
   productionCompanies: [Company!]!
+  releaseDate: DateTime!
   reviews(after: ID, before: ID, first: Int, last: Int): MovieReviewsConnection!
   runningTime: Int!
   title: String!
@@ -287,6 +297,7 @@ type Review implements Node {
   externalUrl: String
   id: ID!
   movie: Movie!
+  postTime: DateTime!
   score: Int!
   thankCount: Int!
   thankUsers(
@@ -332,6 +343,7 @@ type User implements Node {
     first: Int
     last: Int
   ): UserCommentsConnection!
+  dateOfBirth: DateTime
   gender: Gender
   id: ID!
   likedCollections(

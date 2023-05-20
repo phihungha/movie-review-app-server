@@ -11,6 +11,10 @@ schemaBuilder.prismaNode('Review', {
       resolve: (parent) => parent.authorType,
     }),
     title: t.exposeString('title'),
+    postTime: t.field({
+      type: 'DateTime',
+      resolve: (parent) => parent.postTime,
+    }),
     content: t.exposeString('content'),
     score: t.exposeInt('score'),
     externalUrl: t.exposeString('externalUrl', { nullable: true }),

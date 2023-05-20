@@ -12,6 +12,11 @@ schemaBuilder.prismaNode('User', {
       nullable: true,
       resolve: (parent) => parent.gender,
     }),
+    dateOfBirth: t.field({
+      type: 'DateTime',
+      nullable: true,
+      resolve: (parent) => parent.dateOfBirth,
+    }),
     userType: t.field({
       type: UserType,
       resolve: (parent) => parent.userType,

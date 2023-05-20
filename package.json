@@ -49,6 +49,7 @@
     "bcrypt": "^5.1.0",
     "dotenv": "^16.0.3",
     "graphql": "^16.6.0",
+    "graphql-scalars": "^1.22.0",
     "jsonwebtoken": "^9.0.0",
     "zod": "^3.21.4"
   },

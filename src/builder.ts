@@ -12,6 +12,12 @@ export const prismaClient = new PrismaClient({});
 
 export const schemaBuilder = new SchemaBuilder<{
   Context: Context;
+  Scalars: {
+    DateTime: {
+      Input: Date;
+      Output: Date;
+    };
+  };
   PrismaTypes: PrismaTypes;
 }>({
   plugins: [
