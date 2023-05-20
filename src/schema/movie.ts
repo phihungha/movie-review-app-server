@@ -1,4 +1,5 @@
 import { schemaBuilder } from '../builder';
+import { prismaClient } from '../prisma-client';
 
 schemaBuilder.prismaNode('Movie', {
   id: { field: 'id' },
@@ -31,3 +32,13 @@ schemaBuilder.prismaNode('Movie', {
     collections: t.relatedConnection('collections', { cursor: 'id' }),
   }),
 });
+
+schemaBuilder.queryField('movies', (t) =>
+  t.prismaField({
+    type: ['Movie'],
+    resolve: async (query) =>
+      await prismaClient.movie.findMany({
+        ...query,
+      }),
+  })
+);

@@ -1,4 +1,4 @@
-import { prismaClient } from './builder';
+import { prismaClient } from './prisma-client';
 
 export async function authenticate() {
   return await prismaClient.user.findFirstOrThrow({
