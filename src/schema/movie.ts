@@ -5,7 +5,7 @@ import { SortDirection } from './enums/sort-direction';
 import { Prisma } from '@prisma/client';
 import { ReviewSortBy } from './enums/review-sort-by';
 
-function createReviewsOrderByQuery(
+export function createReviewsOrderByQuery(
   sortByArgValue: ReviewSortBy | undefined | null,
   sortDirection: SortDirection | undefined | null
 ): Prisma.Enumerable<Prisma.ReviewOrderByWithRelationInput> | undefined {
@@ -68,6 +68,7 @@ schemaBuilder.prismaNode('Movie', {
         orderBy: createReviewsOrderByQuery(args.sortBy, args.sortDirection),
       }),
     }),
+
     userScore: t.exposeFloat('userScore', { nullable: true }),
     userReviewCount: t.exposeInt('userReviewCount'),
     criticScore: t.exposeFloat('criticScore', { nullable: true }),
