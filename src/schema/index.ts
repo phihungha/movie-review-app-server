@@ -1,6 +1,7 @@
 import { lexicographicSortSchema, printSchema } from 'graphql';
 import { schemaBuilder } from '../schema-builder';
 import { writeFileSync } from 'fs';
+import prettier from 'prettier';
 import './error';
 import './enums';
 import './scalars';
@@ -17,4 +18,5 @@ import './query';
 
 export const gqlSchema = schemaBuilder.toSchema();
 const schemaText = printSchema(lexicographicSortSchema(gqlSchema));
-writeFileSync('./schema.graphql', schemaText);
+const formattedSchemaText = prettier.format(schemaText, { parser: 'graphql' });
+writeFileSync('./schema.graphql', formattedSchemaText);
