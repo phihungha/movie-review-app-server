@@ -3,6 +3,27 @@ import { prismaClient } from '../prisma-client';
 import { MovieSortBy } from './enums/movie-sort-by';
 import { SortDirection } from './enums/sort-direction';
 import { Prisma } from '@prisma/client';
+import { ReviewSortBy } from './enums/review-sort-by';
+
+function createReviewsOrderByQuery(
+  sortByArgValue: ReviewSortBy | undefined | null,
+  sortDirection: SortDirection | undefined | null
+): Prisma.Enumerable<Prisma.ReviewOrderByWithRelationInput> | undefined {
+  if (sortByArgValue === undefined || sortByArgValue === null) {
+    return { postTime: 'desc' };
+  }
+  const orderByDirection = sortDirection === SortDirection.Asc ? 'asc' : 'desc';
+  switch (sortByArgValue) {
+    case ReviewSortBy.PostTime:
+      return { postTime: orderByDirection };
+    case ReviewSortBy.Score:
+      return { score: orderByDirection };
+    case ReviewSortBy.ThankCount:
+      return { thankCount: orderByDirection };
+    case ReviewSortBy.CommentCount:
+      return { commentCount: orderByDirection };
+  }
+}
 
 schemaBuilder.prismaNode('Movie', {
   id: { field: 'id' },
@@ -25,7 +46,28 @@ schemaBuilder.prismaNode('Movie', {
     composers: t.relation('composers'),
     actingCredits: t.relation('actingCredits'),
 
-    reviews: t.relatedConnection('reviews', { cursor: 'id' }),
+    reviews: t.relatedConnection('reviews', {
+      cursor: 'id',
+      args: {
+        searchTerm: t.arg.string(),
+        minScore: t.arg.int(),
+        maxScore: t.arg.int(),
+        sortBy: t.arg({ type: ReviewSortBy }),
+        sortDirection: t.arg({ type: SortDirection }),
+      },
+      query: (args) => ({
+        where: {
+          score: { gte: args.minScore ?? 0, lte: args.maxScore ?? 10 },
+          OR: [
+            { title: { contains: args.searchTerm ?? '', mode: 'insensitive' } },
+            {
+              content: { contains: args.searchTerm ?? '', mode: 'insensitive' },
+            },
+          ],
+        },
+        orderBy: createReviewsOrderByQuery(args.sortBy, args.sortDirection),
+      }),
+    }),
     userScore: t.exposeFloat('userScore', { nullable: true }),
     userReviewCount: t.exposeInt('userReviewCount'),
     criticScore: t.exposeFloat('criticScore', { nullable: true }),
@@ -36,7 +78,7 @@ schemaBuilder.prismaNode('Movie', {
   }),
 });
 
-function createOrderByQuery(
+function createMoviesOrderByQuery(
   sortByArgValue: MovieSortBy | undefined | null,
   sortDirection: SortDirection | undefined | null
 ): Prisma.Enumerable<Prisma.MovieOrderByWithRelationInput> | undefined {
@@ -63,7 +105,7 @@ schemaBuilder.queryFields((t) => ({
     type: 'Movie',
     cursor: 'id',
     args: {
-      nameContains: t.arg.string(),
+      titleContains: t.arg.string(),
       genres: t.arg.stringList(),
       minRegularScore: t.arg.int(),
       maxRegularScore: t.arg.int(),
@@ -76,8 +118,15 @@ schemaBuilder.queryFields((t) => ({
       prismaClient.movie.findMany({
         ...query,
         where: {
-          title: { contains: args.nameContains ?? undefined },
-          genres: { some: { name: { in: args.genres ?? undefined } } },
+          title: {
+            contains: args.titleContains ?? undefined,
+            mode: 'insensitive',
+          },
+          genres: {
+            some: {
+              name: { in: args.genres ?? undefined, mode: 'insensitive' },
+            },
+          },
           criticScore: {
             lte: args.maxCriticScore ?? 10,
             gte: args.minCriticScore ?? 0,
@@ -87,7 +136,19 @@ schemaBuilder.queryFields((t) => ({
             gte: args.minRegularScore ?? 0,
           },
         },
-        orderBy: createOrderByQuery(args.sortBy, args.sortDirection),
+        orderBy: createMoviesOrderByQuery(args.sortBy, args.sortDirection),
+      }),
+  }),
+  movie: t.prismaField({
+    type: 'Movie',
+    nullable: true,
+    args: {
+      id: t.arg.globalID({ required: true }),
+    },
+    resolve: (query, root, args, ctx, info) =>
+      prismaClient.movie.findUnique({
+        ...query,
+        where: { id: +args.id.id },
       }),
   }),
 }));

@@ -229,7 +229,17 @@ type Movie implements Node {
   posterUrl: String
   productionCompanies: [Company!]!
   releaseDate: DateTime!
-  reviews(after: ID, before: ID, first: Int, last: Int): MovieReviewsConnection!
+  reviews(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+    maxScore: Int
+    minScore: Int
+    searchTerm: String
+    sortBy: ReviewSortBy
+    sortDirection: SortDirection
+  ): MovieReviewsConnection!
   runningTime: Int!
   title: String!
   userReviewCount: Int!
@@ -294,6 +304,7 @@ type PageInfo {
 }
 
 type Query {
+  movie(id: ID!): Movie
   movies(
     after: ID
     before: ID
@@ -304,9 +315,9 @@ type Query {
     maxRegularScore: Int
     minCriticScore: Int
     minRegularScore: Int
-    nameContains: String
     sortBy: MovieSortBy
     sortDirection: SortDirection
+    titleContains: String
   ): QueryMoviesConnection!
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
@@ -357,6 +368,13 @@ type ReviewCommentsConnection {
 type ReviewCommentsConnectionEdge {
   cursor: ID!
   node: Comment!
+}
+
+enum ReviewSortBy {
+  CommentCount
+  PostTime
+  Score
+  ThankCount
 }
 
 type ReviewThankUsersConnection {
