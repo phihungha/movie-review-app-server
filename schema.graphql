@@ -11,8 +11,18 @@ type Collection implements Node {
   id: ID!
   lastUpdateTime: DateTime
   likeCount: Int!
-  likeUsers(after: ID, before: ID, first: Int, last: Int): CollectionLikeUsersConnection!
-  movies(after: ID, before: ID, first: Int, last: Int): CollectionMoviesConnection!
+  likeUsers(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): CollectionLikeUsersConnection!
+  movies(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): CollectionMoviesConnection!
   name: String!
 }
 
@@ -46,10 +56,20 @@ type Comment implements Node {
 }
 
 type Company implements Node {
-  distributedMovies(after: ID, before: ID, first: Int, last: Int): CompanyDistributedMoviesConnection!
+  distributedMovies(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): CompanyDistributedMoviesConnection!
   id: ID!
   name: String!
-  producedMovies(after: ID, before: ID, first: Int, last: Int): CompanyProducedMoviesConnection!
+  producedMovies(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): CompanyProducedMoviesConnection!
 }
 
 type CompanyDistributedMoviesConnection {
@@ -74,13 +94,38 @@ type CompanyProducedMoviesConnectionEdge {
 
 type CrewMember implements Node {
   avatarUrl: String
-  directedMovies(after: ID, before: ID, first: Int, last: Int): CrewMemberDirectedMoviesConnection!
-  dopMovies(after: ID, before: ID, first: Int, last: Int): CrewMemberDopMoviesConnection!
-  editedMovies(after: ID, before: ID, first: Int, last: Int): CrewMemberEditedMoviesConnection!
+  directedMovies(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): CrewMemberDirectedMoviesConnection!
+  dopMovies(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): CrewMemberDopMoviesConnection!
+  editedMovies(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): CrewMemberEditedMoviesConnection!
   id: ID!
   name: String!
-  scoredMovies(after: ID, before: ID, first: Int, last: Int): CrewMemberScoredMoviesConnection!
-  writtenMovies(after: ID, before: ID, first: Int, last: Int): CrewMemberWrittenMoviesConnection!
+  scoredMovies(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): CrewMemberScoredMoviesConnection!
+  writtenMovies(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): CrewMemberWrittenMoviesConnection!
 }
 
 type CrewMemberDirectedMoviesConnection {
@@ -171,7 +216,12 @@ type GenreMoviesConnectionEdge {
 
 type Movie implements Node {
   actingCredits: [ActingCredit!]!
-  collections(after: ID, before: ID, first: Int, last: Int): MovieCollectionsConnection!
+  collections(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): MovieCollectionsConnection!
   composers: [CrewMember!]!
   criticReviewCount: Int!
   criticScore: Float
@@ -184,13 +234,28 @@ type Movie implements Node {
   posterUrl: String
   productionCompanies: [Company!]!
   releaseDate: Date!
-  reviews(after: ID, before: ID, first: Int, last: Int, maxScore: Int, minScore: Int, sortBy: ReviewSortBy, sortDirection: SortDirection, textContains: String): MovieReviewsConnection!
+  reviews(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+    maxScore: Int
+    minScore: Int
+    sortBy: ReviewSortBy
+    sortDirection: SortDirection
+    textContains: String
+  ): MovieReviewsConnection!
   runningTime: Int!
   title: String!
   userReviewCount: Int!
   userScore: Float
   viewedUserCount: Int!
-  viewedUsers(after: ID, before: ID, first: Int, last: Int): MovieViewedUsersConnection!
+  viewedUsers(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): MovieViewedUsersConnection!
   writers: [CrewMember!]!
 }
 
@@ -245,13 +310,32 @@ type PageInfo {
 
 type Query {
   movie(id: ID!): Movie
-  movies(after: ID, before: ID, first: Int, genres: [String!], last: Int, maxCriticScore: Int, maxRegularScore: Int, minCriticScore: Int, minRegularScore: Int, sortBy: MovieSortBy, sortDirection: SortDirection, titleContains: String): QueryMoviesConnection!
+  movies(
+    after: ID
+    before: ID
+    first: Int
+    genres: [String!]
+    last: Int
+    maxCriticScore: Int
+    maxRegularScore: Int
+    minCriticScore: Int
+    minRegularScore: Int
+    sortBy: MovieSortBy
+    sortDirection: SortDirection
+    titleContains: String
+  ): QueryMoviesConnection!
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
   ok: Boolean!
   review(id: ID!): Review
   user(id: ID!): User
-  users(after: ID, before: ID, first: Int, last: Int, nameContains: String): QueryUsersConnection!
+  users(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+    nameContains: String
+  ): QueryUsersConnection!
 }
 
 type QueryMoviesConnection {
@@ -278,7 +362,12 @@ type Review implements Node {
   author: User!
   authorType: UserType!
   commentCount: Int!
-  comments(after: ID, before: ID, first: Int, last: Int): ReviewCommentsConnection!
+  comments(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): ReviewCommentsConnection!
   content: String!
   externalUrl: String
   id: ID!
@@ -286,7 +375,12 @@ type Review implements Node {
   postTime: DateTime!
   score: Int!
   thankCount: Int!
-  thankUsers(after: ID, before: ID, first: Int, last: Int): ReviewThankUsersConnection!
+  thankUsers(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): ReviewThankUsersConnection!
   title: String!
 }
 
@@ -324,18 +418,55 @@ enum SortDirection {
 
 type User implements Node {
   avatarUrl: String
-  collections(after: ID, before: ID, first: Int, last: Int): UserCollectionsConnection!
-  comments(after: ID, before: ID, contentContains: String, first: Int, last: Int): UserCommentsConnection!
+  blogUrl: String
+  collections(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): UserCollectionsConnection!
+  comments(
+    after: ID
+    before: ID
+    contentContains: String
+    first: Int
+    last: Int
+  ): UserCommentsConnection!
   dateOfBirth: Date
   gender: Gender
   id: ID!
-  likedCollections(after: ID, before: ID, first: Int, last: Int): UserLikedCollectionsConnection!
+  likedCollections(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): UserLikedCollectionsConnection!
   name: String!
-  reviewThanks(after: ID, before: ID, first: Int, last: Int): UserReviewThanksConnection!
-  reviews(after: ID, before: ID, first: Int, last: Int, maxScore: Int, minScore: Int, sortBy: ReviewSortBy, sortDirection: SortDirection, textContains: String): UserReviewsConnection!
+  reviewThanks(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): UserReviewThanksConnection!
+  reviews(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+    maxScore: Int
+    minScore: Int
+    sortBy: ReviewSortBy
+    sortDirection: SortDirection
+    textContains: String
+  ): UserReviewsConnection!
   userType: UserType!
   username: String!
-  viewedMovies(after: ID, before: ID, first: Int, last: Int): UserViewedMoviesConnection!
+  viewedMovies(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): UserViewedMoviesConnection!
 }
 
 type UserCollectionsConnection {

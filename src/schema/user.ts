@@ -25,6 +25,13 @@ schemaBuilder.prismaNode('User', {
       type: UserType,
       resolve: (parent) => parent.userType,
     }),
+    blogUrl: t.string({
+      nullable: true,
+      select: {
+        criticUser: true,
+      },
+      resolve: (user) => user.criticUser?.blogUrl,
+    }),
 
     reviews: t.relatedConnection('reviews', {
       cursor: 'id',
