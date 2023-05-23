@@ -1,5 +1,6 @@
 import { UserType } from '@prisma/client';
 import { schemaBuilder } from '../schema-builder';
+import { prismaClient } from '../prisma-client';
 
 schemaBuilder.prismaNode('Review', {
   id: { field: 'id' },
@@ -24,3 +25,18 @@ schemaBuilder.prismaNode('Review', {
     commentCount: t.exposeInt('commentCount'),
   }),
 });
+
+schemaBuilder.queryField('review', (t) =>
+  t.prismaField({
+    type: 'Review',
+    nullable: true,
+    args: {
+      id: t.arg.globalID({ required: true }),
+    },
+    resolve: (query, root, args, context, info) =>
+      prismaClient.review.findUnique({
+        ...query,
+        where: { id: +args.id.id },
+      }),
+  })
+);

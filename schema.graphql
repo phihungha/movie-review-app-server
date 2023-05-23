@@ -322,6 +322,7 @@ type Query {
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
   ok: Boolean!
+  review(id: ID!): Review
 }
 
 type QueryMoviesConnection {
