@@ -15,6 +15,10 @@ export const schemaBuilder = new SchemaBuilder<{
       Input: Date;
       Output: Date;
     };
+    Date: {
+      Input: Date;
+      Output: Date;
+    };
   };
   PrismaTypes: PrismaTypes;
 }>({

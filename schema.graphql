@@ -179,7 +179,12 @@ type CrewMemberWrittenMoviesConnectionEdge {
 }
 
 """
-A local date-time string (i.e., with no associated timezone) in `YYYY-MM-DDTHH:mm:ss` format, e.g. `2020-01-01T00:00:00`.
+A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar Date
+
+"""
+A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
 """
 scalar DateTime
 
@@ -228,7 +233,7 @@ type Movie implements Node {
   id: ID!
   posterUrl: String
   productionCompanies: [Company!]!
-  releaseDate: DateTime!
+  releaseDate: Date!
   reviews(
     after: ID
     before: ID
@@ -329,7 +334,7 @@ type Query {
     before: ID
     first: Int
     last: Int
-    name: String
+    nameContains: String
   ): QueryUsersConnection!
 }
 
@@ -426,7 +431,7 @@ type User implements Node {
     first: Int
     last: Int
   ): UserCommentsConnection!
-  dateOfBirth: DateTime
+  dateOfBirth: Date
   gender: Gender
   id: ID!
   likedCollections(
@@ -449,9 +454,9 @@ type User implements Node {
     last: Int
     maxScore: Int
     minScore: Int
-    searchTerm: String
     sortBy: ReviewSortBy
     sortDirection: SortDirection
+    textContains: String
   ): UserReviewsConnection!
   userType: UserType!
   username: String!

@@ -31,7 +31,7 @@ schemaBuilder.prismaNode('Movie', {
     title: t.exposeString('title'),
     posterUrl: t.exposeString('posterUrl', { nullable: true }),
     releaseDate: t.field({
-      type: 'DateTime',
+      type: 'Date',
       resolve: (parent) => parent.releaseDate,
     }),
     runningTime: t.exposeInt('runningTime'),

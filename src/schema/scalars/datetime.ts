@@ -1,4 +1,5 @@
-import { GraphQLLocalDateTime } from 'graphql-scalars';
+import { GraphQLDate, GraphQLDateTime } from 'graphql-scalars';
 import { schemaBuilder } from '../../schema-builder';
 
-schemaBuilder.addScalarType('DateTime', GraphQLLocalDateTime, {});
+schemaBuilder.addScalarType('DateTime', GraphQLDateTime, {});
+schemaBuilder.addScalarType('Date', GraphQLDate, {});

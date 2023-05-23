@@ -17,7 +17,7 @@ schemaBuilder.prismaNode('User', {
       resolve: (parent) => parent.gender,
     }),
     dateOfBirth: t.field({
-      type: 'DateTime',
+      type: 'Date',
       nullable: true,
       resolve: (parent) => parent.dateOfBirth,
     }),
@@ -29,7 +29,7 @@ schemaBuilder.prismaNode('User', {
     reviews: t.relatedConnection('reviews', {
       cursor: 'id',
       args: {
-        searchTerm: t.arg.string(),
+        textContains: t.arg.string(),
         minScore: t.arg.int(),
         maxScore: t.arg.int(),
         sortBy: t.arg({ type: ReviewSortBy }),
@@ -39,9 +39,14 @@ schemaBuilder.prismaNode('User', {
         where: {
           score: { gte: args.minScore ?? 0, lte: args.maxScore ?? 10 },
           OR: [
-            { title: { contains: args.searchTerm ?? '', mode: 'insensitive' } },
             {
-              content: { contains: args.searchTerm ?? '', mode: 'insensitive' },
+              title: { contains: args.textContains ?? '', mode: 'insensitive' },
+            },
+            {
+              content: {
+                contains: args.textContains ?? '',
+                mode: 'insensitive',
+              },
             },
           ],
         },
@@ -78,12 +83,12 @@ schemaBuilder.queryFields((t) => ({
     type: 'User',
     cursor: 'id',
     args: {
-      name: t.arg.string(),
+      nameContains: t.arg.string(),
     },
     resolve: (query, parent, args, context, info) =>
       prismaClient.user.findMany({
         ...query,
-        where: { name: { contains: args.name ?? undefined } },
+        where: { name: { contains: args.nameContains ?? undefined } },
       }),
   }),
   user: t.prismaField({

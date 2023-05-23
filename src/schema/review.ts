@@ -21,7 +21,10 @@ schemaBuilder.prismaNode('Review', {
     externalUrl: t.exposeString('externalUrl', { nullable: true }),
     thankUsers: t.relatedConnection('thankUsers', { cursor: 'id' }),
     thankCount: t.exposeInt('thankCount'),
-    comments: t.relatedConnection('comments', { cursor: 'id' }),
+    comments: t.relatedConnection('comments', {
+      cursor: 'id',
+      query: { orderBy: { postTime: 'desc' } },
+    }),
     commentCount: t.exposeInt('commentCount'),
   }),
 });
