@@ -36,7 +36,7 @@ schemaBuilder.queryField('review', (t) =>
     args: {
       id: t.arg.globalID({ required: true }),
     },
-    resolve: (query, root, args, context, info) =>
+    resolve: (query, _, args) =>
       prismaClient.review.findUnique({
         ...query,
         where: { id: +args.id.id },

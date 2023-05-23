@@ -115,7 +115,7 @@ schemaBuilder.queryFields((t) => ({
       sortBy: t.arg({ type: MovieSortBy }),
       sortDirection: t.arg({ type: SortDirection }),
     },
-    resolve: async (query, root, args, ctx, info) =>
+    resolve: async (query, _, args) =>
       prismaClient.movie.findMany({
         ...query,
         where: {
@@ -146,7 +146,7 @@ schemaBuilder.queryFields((t) => ({
     args: {
       id: t.arg.globalID({ required: true }),
     },
-    resolve: (query, root, args, ctx, info) =>
+    resolve: (query, _, args) =>
       prismaClient.movie.findUnique({
         ...query,
         where: { id: +args.id.id },

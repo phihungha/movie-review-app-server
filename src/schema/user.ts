@@ -85,7 +85,7 @@ schemaBuilder.queryFields((t) => ({
     args: {
       nameContains: t.arg.string(),
     },
-    resolve: (query, parent, args, context, info) =>
+    resolve: (query, _, args) =>
       prismaClient.user.findMany({
         ...query,
         where: { name: { contains: args.nameContains ?? undefined } },
@@ -97,7 +97,7 @@ schemaBuilder.queryFields((t) => ({
     args: {
       id: t.arg.globalID({ required: true }),
     },
-    resolve: (query, parent, args, context, info) =>
+    resolve: (query, _, args) =>
       prismaClient.user.findUnique({
         ...query,
         where: { id: +args.id.id },
