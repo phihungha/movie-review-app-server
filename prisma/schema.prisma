@@ -127,11 +127,12 @@ model Review {
   movie      Movie    @relation(fields: [movieId], references: [id])
   movieId    Int
 
-  title       String
-  postTime    DateTime @default(now())
-  score       Int
-  content     String
-  externalUrl String?
+  title          String
+  postTime       DateTime  @default(now())
+  lastUpdateTime DateTime?
+  score          Int
+  content        String
+  externalUrl    String?
 
   thankUsers   User[]    @relation(name: "review-thank")
   thankCount   Int       @default(0)
@@ -148,6 +149,7 @@ model Comment {
 
   postTime       DateTime  @default(now())
   lastUpdateTime DateTime?
+  isRemoved      Boolean   @default(false)
   content        String
 }
 

@@ -92,6 +92,7 @@ CREATE TABLE "Review" (
     "movieId" INTEGER NOT NULL,
     "title" TEXT NOT NULL,
     "postTime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "lastUpdateTime" TIMESTAMP(3),
     "score" INTEGER NOT NULL,
     "content" TEXT NOT NULL,
     "externalUrl" TEXT,
@@ -108,6 +109,7 @@ CREATE TABLE "Comment" (
     "reviewId" INTEGER NOT NULL,
     "postTime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "lastUpdateTime" TIMESTAMP(3),
+    "isRemoved" BOOLEAN NOT NULL DEFAULT false,
     "content" TEXT NOT NULL,
 
     CONSTRAINT "Comment_pkey" PRIMARY KEY ("id")

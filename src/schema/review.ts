@@ -61,8 +61,8 @@ schemaBuilder.mutationField('createReview', (t) =>
     args: {
       input: t.arg({ type: CreateReviewInput, required: true }),
     },
-    resolve: async (query, _, args, context) =>
-      await prismaClient.review.create({
+    resolve: (query, _, args, context) =>
+      prismaClient.review.create({
         ...query,
         data: {
           title: args.input.title,
@@ -93,14 +93,15 @@ schemaBuilder.mutationField('editReview', (t) =>
       id: t.arg.globalID({ required: true }),
       input: t.arg({ type: EditReviewInput, required: true }),
     },
-    resolve: async (query, _, args) =>
-      await prismaClient.review.update({
+    resolve: (query, _, args) =>
+      prismaClient.review.update({
         ...query,
         where: { id: +args.id.id },
         data: {
           title: args.input.title ?? undefined,
           content: args.input.content ?? undefined,
           externalUrl: args.input.externalUrl,
+          lastUpdateTime: new Date(),
         },
       }),
   })
@@ -113,8 +114,8 @@ schemaBuilder.mutationField('deleteReview', (t) =>
     args: {
       id: t.arg.globalID({ required: true }),
     },
-    resolve: async (query, _, args) =>
-      await prismaClient.review.delete({
+    resolve: (query, _, args) =>
+      prismaClient.review.delete({
         ...query,
         where: { id: +args.id.id },
       }),

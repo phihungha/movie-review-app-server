@@ -96,6 +96,11 @@ type CompanyProducedMoviesConnectionEdge {
   node: Movie!
 }
 
+input CreateCommentInput {
+  content: String!
+  reviewId: ID!
+}
+
 input CreateReviewInput {
   content: String!
   externalUrl: String
@@ -199,6 +204,10 @@ scalar Date
 A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
 """
 scalar DateTime
+
+input EditCommentInput {
+  content: String!
+}
 
 input EditReviewInput {
   content: String
@@ -321,8 +330,11 @@ type MovieViewedUsersConnectionEdge {
 }
 
 type Mutation {
+  createComment(input: CreateCommentInput!): Comment!
   createReview(input: CreateReviewInput!): Review!
+  deleteComment(id: ID!): Comment!
   deleteReview(id: ID!): Review!
+  editComment(id: ID!, input: EditCommentInput!): Comment!
   editReview(id: ID!, input: EditReviewInput!): Review!
   login(password: String!, username: String!): AuthResult!
   signUp(input: SignUpInput!): User!
