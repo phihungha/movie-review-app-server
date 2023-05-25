@@ -1,4 +1,4 @@
-import { UserType } from '@prisma/client';
+import { Review, UserType } from '@prisma/client';
 import { schemaBuilder } from '../schema-builder';
 import { prismaClient } from '../prisma-client';
 
@@ -44,6 +44,37 @@ schemaBuilder.queryField('review', (t) =>
   })
 );
 
+async function updateAggregateData(txClient: any, review: Review) {
+  const movieId = review.movieId;
+  const authorType = review.authorType;
+
+  const aggregateResult = await txClient.review.aggregate({
+    _avg: { score: true },
+    _count: { id: true },
+    where: { movieId, authorType },
+  });
+  const aggregateScore = aggregateResult._avg.score;
+  const reviewCount = aggregateResult._count.id;
+
+  let dataQuery;
+  if (authorType === UserType.Critic) {
+    dataQuery = {
+      criticScore: aggregateScore,
+      criticReviewCount: reviewCount,
+    };
+  } else {
+    dataQuery = {
+      userScore: aggregateScore,
+      userReviewCount: reviewCount,
+    };
+  }
+
+  await txClient.movie.update({
+    where: { id: movieId },
+    data: { ...dataQuery },
+  });
+}
+
 const CreateReviewInput = schemaBuilder.inputType('CreateReviewInput', {
   fields: (t) => ({
     movieId: t.globalID({ required: true }),
@@ -62,17 +93,22 @@ schemaBuilder.mutationField('createReview', (t) =>
       input: t.arg({ type: CreateReviewInput, required: true }),
     },
     resolve: (query, _, args, context) =>
-      prismaClient.review.create({
-        ...query,
-        data: {
-          title: args.input.title,
-          content: args.input.content,
-          score: args.input.score,
-          movie: { connect: { id: +args.input.movieId.id } },
-          author: { connect: { id: context.currentUser!.id } },
-          authorType: context.currentUser!.userType,
-          externalUrl: args.input.externalUrl,
-        },
+      prismaClient.$transaction(async (client) => {
+        const authorType = context.currentUser!.userType;
+        const review = await client.review.create({
+          ...query,
+          data: {
+            title: args.input.title,
+            content: args.input.content,
+            score: args.input.score,
+            movie: { connect: { id: +args.input.movieId.id } },
+            author: { connect: { id: context.currentUser!.id } },
+            authorType,
+            externalUrl: args.input.externalUrl,
+          },
+        });
+        await updateAggregateData(client, review);
+        return review;
       }),
   })
 );
@@ -115,9 +151,13 @@ schemaBuilder.mutationField('deleteReview', (t) =>
       id: t.arg.globalID({ required: true }),
     },
     resolve: (query, _, args) =>
-      prismaClient.review.delete({
-        ...query,
-        where: { id: +args.id.id },
+      prismaClient.$transaction(async (client) => {
+        const review = await prismaClient.review.delete({
+          ...query,
+          where: { id: +args.id.id },
+        });
+        await updateAggregateData(client, review);
+        return review;
       }),
   })
 );
