@@ -18,7 +18,10 @@ schemaBuilder.objectType(AuthResult, {
   }),
 });
 
-async function generateAccessToken(username: string, password: string) {
+async function generateAccessToken(
+  username: string,
+  password: string
+): Promise<string> {
   const users = await prismaClient.user.findMany({
     where: {
       OR: [{ username }, { email: username }],

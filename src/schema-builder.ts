@@ -25,6 +25,9 @@ export const schemaBuilder = new SchemaBuilder<{
     };
   };
   PrismaTypes: PrismaTypes;
+  AuthScopes: {
+    user: boolean;
+  };
 }>({
   plugins: [
     RelayPlugin,
@@ -37,7 +40,7 @@ export const schemaBuilder = new SchemaBuilder<{
     clientMutationId: 'omit',
     cursorType: 'ID',
   },
-  authScopes: async (context) => ({
+  authScopes: (context) => ({
     user: context.currentUser ? true : false,
   }),
   errorOptions: {
