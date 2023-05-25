@@ -18,7 +18,7 @@ schemaBuilder.objectType(AuthResult, {
   }),
 });
 
-async function authenticate(username: string, password: string) {
+async function generateAccessToken(username: string, password: string) {
   const users = await prismaClient.user.findMany({
     where: {
       OR: [{ username }, { email: username }],
@@ -38,8 +38,7 @@ async function authenticate(username: string, password: string) {
   if (!process.env.JWT_SECRET) {
     throw new AuthError('No JWT_SECRET configured');
   }
-  const jwtToken = JsonWebToken.sign(jwtPayload, process.env.JWT_SECRET!);
-  return new AuthResult(jwtToken);
+  return JsonWebToken.sign(jwtPayload, process.env.JWT_SECRET!);
 }
 
 schemaBuilder.mutationField('login', (t) =>
@@ -49,6 +48,12 @@ schemaBuilder.mutationField('login', (t) =>
       username: t.arg.string({ required: true }),
       password: t.arg.string({ required: true }),
     },
-    resolve: (_, args) => authenticate(args.username, args.password),
+    resolve: async (_, args) => {
+      const accessToken = await generateAccessToken(
+        args.username,
+        args.password
+      );
+      return new AuthResult(accessToken);
+    },
   })
 );
