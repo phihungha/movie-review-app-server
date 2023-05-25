@@ -308,6 +308,7 @@ type MovieViewedUsersConnectionEdge {
 
 type Mutation {
   login(password: String!, username: String!): AuthResult!
+  signUp(input: SignUpInput!): User!
 }
 
 interface Node {
@@ -421,6 +422,17 @@ type ReviewThankUsersConnection {
 type ReviewThankUsersConnectionEdge {
   cursor: ID!
   node: User!
+}
+
+input SignUpInput {
+  blogUrl: String
+  dateOfBirth: Date
+  email: String!
+  gender: Gender
+  name: String!
+  password: String!
+  userType: UserType!
+  username: String!
 }
 
 enum SortDirection {
