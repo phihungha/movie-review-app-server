@@ -5,6 +5,10 @@ type ActingCredit implements Node {
   movie: Movie!
 }
 
+type AuthResult {
+  accessToken: Jwt!
+}
+
 type Collection implements Node {
   author: User!
   creationTime: DateTime!
@@ -214,6 +218,11 @@ type GenreMoviesConnectionEdge {
   node: Movie!
 }
 
+"""
+A field whose value is a JSON Web Token (JWT): https://jwt.io/introduction.
+"""
+scalar Jwt
+
 type Movie implements Node {
   actingCredits: [ActingCredit!]!
   collections(
@@ -297,6 +306,10 @@ type MovieViewedUsersConnectionEdge {
   node: User!
 }
 
+type Mutation {
+  login(password: String!, username: String!): AuthResult!
+}
+
 interface Node {
   id: ID!
 }
@@ -326,7 +339,6 @@ type Query {
   ): QueryMoviesConnection!
   node(id: ID!): Node
   nodes(ids: [ID!]!): [Node]!
-  ok: Boolean!
   review(id: ID!): Review
   user(id: ID!): User
   users(

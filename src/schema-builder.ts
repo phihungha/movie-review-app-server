@@ -19,6 +19,10 @@ export const schemaBuilder = new SchemaBuilder<{
       Input: Date;
       Output: Date;
     };
+    Jwt: {
+      Input: string;
+      Output: string;
+    };
   };
   PrismaTypes: PrismaTypes;
 }>({

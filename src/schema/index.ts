@@ -14,7 +14,8 @@ import './user';
 import './review';
 import './comment';
 import './collection';
-import './query';
+import './login';
+import './root';
 
 export const gqlSchema = schemaBuilder.toSchema();
 const schemaText = printSchema(lexicographicSortSchema(gqlSchema));
