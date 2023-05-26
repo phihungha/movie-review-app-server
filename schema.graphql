@@ -195,6 +195,26 @@ type CrewMemberWrittenMoviesConnectionEdge {
   node: Movie!
 }
 
+input CriticSignUpInput {
+  blogUrl: String!
+  dateOfBirth: Date
+  email: String!
+  gender: Gender
+  name: String!
+  password: String!
+  username: String!
+}
+
+input CriticUserUpdateInput {
+  blogUrl: String
+  dateOfBirth: Date
+  email: String
+  gender: Gender
+  name: String
+  password: String
+  username: String
+}
+
 """
 A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
 """
@@ -332,13 +352,16 @@ type MovieViewedUsersConnectionEdge {
 type Mutation {
   createComment(input: CreateCommentInput!): Comment!
   createReview(input: CreateReviewInput!): Review!
+  criticSignUp(input: CriticSignUpInput!): User!
   deleteComment(id: ID!): Comment!
   deleteReview(id: ID!): Review!
   editComment(id: ID!, input: EditCommentInput!): Comment!
   editReview(id: ID!, input: EditReviewInput!): Review!
   login(password: String!, username: String!): AuthResult!
-  signUp(input: SignUpInput!): User!
+  regularSignUp(input: RegularSignUpInput!): User!
   thankReview(reviewId: ID!, thank: Boolean!): Review!
+  updateCriticUser(id: ID!, input: CriticUserUpdateInput!): User!
+  updateRegularUser(id: ID!, input: RegularUserUpdateInput!): User!
 }
 
 interface Node {
@@ -401,6 +424,24 @@ type QueryUsersConnectionEdge {
   node: User!
 }
 
+input RegularSignUpInput {
+  dateOfBirth: Date
+  email: String!
+  gender: Gender
+  name: String!
+  password: String!
+  username: String!
+}
+
+input RegularUserUpdateInput {
+  dateOfBirth: Date
+  email: String
+  gender: Gender
+  name: String
+  password: String
+  username: String
+}
+
 type Review implements Node {
   author: User!
   authorType: UserType!
@@ -452,17 +493,6 @@ type ReviewThankUsersConnection {
 type ReviewThankUsersConnectionEdge {
   cursor: ID!
   node: User!
-}
-
-input SignUpInput {
-  blogUrl: String
-  dateOfBirth: Date
-  email: String!
-  gender: Gender
-  name: String!
-  password: String!
-  userType: UserType!
-  username: String!
 }
 
 enum SortDirection {

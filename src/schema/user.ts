@@ -1,12 +1,12 @@
 import { schemaBuilder } from '../schema-builder';
-import { Gender, User, UserType } from '@prisma/client';
+import { Gender, UserType, User } from '@prisma/client';
 import { ReviewSortBy } from './enums/review-sort-by';
 import { SortDirection } from './enums/sort-direction';
 import { createReviewsOrderByQuery } from './movie';
 import { prismaClient } from '../prisma-client';
 import bcrypt from 'bcrypt';
 
-const User = schemaBuilder.prismaNode('User', {
+schemaBuilder.prismaNode('User', {
   id: { field: 'id' },
   fields: (t) => ({
     username: t.exposeString('username'),
@@ -22,15 +22,10 @@ const User = schemaBuilder.prismaNode('User', {
       nullable: true,
       resolve: (parent) => parent.dateOfBirth,
     }),
-    userType: t.field({
-      type: UserType,
-      resolve: (parent) => parent.userType,
-    }),
+    userType: t.field({ type: UserType, resolve: (parent) => parent.userType }),
     blogUrl: t.string({
       nullable: true,
-      select: {
-        criticUser: true,
-      },
+      select: { criticUser: true },
       resolve: (user) => user.criticUser?.blogUrl,
     }),
 
@@ -113,28 +108,12 @@ schemaBuilder.queryFields((t) => ({
   }),
 }));
 
-function userTypeDataCreationQuery(
-  userType: UserType,
-  blogUrl?: string | null
-) {
-  if (userType === UserType.Critic) {
-    if (!blogUrl) {
-      throw new Error('Critic user needs a blog or website URL');
-    }
-    return {
-      criticUser: { create: { blogUrl } },
-    };
-  }
-
-  return { regularUser: { create: {} } };
-}
-
 async function hashPassword(password: string): Promise<string> {
   const salt = await bcrypt.genSalt(12);
   return await bcrypt.hash(password, salt);
 }
 
-const SignUpInput = schemaBuilder.inputType('SignUpInput', {
+const CriticSignUpInput = schemaBuilder.inputType('CriticSignUpInput', {
   fields: (t) => ({
     username: t.string({ required: true }),
     email: t.string({ required: true }),
@@ -142,28 +121,140 @@ const SignUpInput = schemaBuilder.inputType('SignUpInput', {
     password: t.string({ required: true }),
     dateOfBirth: t.field({ type: 'Date' }),
     gender: t.field({ type: Gender }),
-    userType: t.field({ type: UserType, required: true }),
-    blogUrl: t.string(),
+    blogUrl: t.string({ required: true }),
   }),
 });
 
-schemaBuilder.mutationField('signUp', (t) =>
-  t.field({
-    type: User,
+schemaBuilder.mutationField('criticSignUp', (t) =>
+  t.prismaField({
+    type: 'User',
     args: {
-      input: t.arg({ type: SignUpInput, required: true }),
+      input: t.arg({ type: CriticSignUpInput, required: true }),
     },
-    resolve: async (_, args) =>
+    resolve: async (query, _, args) =>
       await prismaClient.user.create({
+        ...query,
         data: {
           username: args.input.username,
           name: args.input.name,
           email: args.input.email,
           dateOfBirth: args.input.dateOfBirth,
           gender: args.input.gender,
-          userType: args.input.userType,
-          ...userTypeDataCreationQuery(args.input.userType, args.input.blogUrl),
+          userType: UserType.Critic,
           hashedPassword: await hashPassword(args.input.password),
+          criticUser: { create: { blogUrl: args.input.blogUrl } },
+        },
+      }),
+  })
+);
+
+const RegularSignUpInput = schemaBuilder.inputType('RegularSignUpInput', {
+  fields: (t) => ({
+    username: t.string({ required: true }),
+    email: t.string({ required: true }),
+    name: t.string({ required: true }),
+    password: t.string({ required: true }),
+    dateOfBirth: t.field({ type: 'Date' }),
+    gender: t.field({ type: Gender }),
+  }),
+});
+
+schemaBuilder.mutationField('regularSignUp', (t) =>
+  t.prismaField({
+    type: 'User',
+    args: {
+      input: t.arg({ type: RegularSignUpInput, required: true }),
+    },
+    resolve: async (query, _, args) =>
+      await prismaClient.user.create({
+        ...query,
+        data: {
+          username: args.input.username,
+          name: args.input.name,
+          email: args.input.email,
+          dateOfBirth: args.input.dateOfBirth,
+          gender: args.input.gender,
+          userType: UserType.Regular,
+          hashedPassword: await hashPassword(args.input.password),
+          regularUser: { create: {} },
+        },
+      }),
+  })
+);
+
+const CriticUserUpdateInput = schemaBuilder.inputType('CriticUserUpdateInput', {
+  fields: (t) => ({
+    username: t.string(),
+    email: t.string(),
+    name: t.string(),
+    password: t.string(),
+    dateOfBirth: t.field({ type: 'Date' }),
+    gender: t.field({ type: Gender }),
+    blogUrl: t.string(),
+  }),
+});
+
+schemaBuilder.mutationField('updateCriticUser', (t) =>
+  t.prismaField({
+    type: 'User',
+    authScopes: { user: true },
+    args: {
+      id: t.arg.globalID({ required: true }),
+      input: t.arg({ type: CriticUserUpdateInput, required: true }),
+    },
+    resolve: async (query, _, args) =>
+      await prismaClient.user.update({
+        ...query,
+        where: { id: +args.id.id },
+        data: {
+          username: args.input.username ?? undefined,
+          name: args.input.name ?? undefined,
+          email: args.input.email ?? undefined,
+          dateOfBirth: args.input.dateOfBirth,
+          gender: args.input.gender,
+          hashedPassword: args.input.password
+            ? await hashPassword(args.input.password)
+            : undefined,
+          criticUser: { update: { blogUrl: args.input.blogUrl ?? undefined } },
+        },
+      }),
+  })
+);
+
+const RegularUserUpdateInput = schemaBuilder.inputType(
+  'RegularUserUpdateInput',
+  {
+    fields: (t) => ({
+      username: t.string(),
+      email: t.string(),
+      name: t.string(),
+      password: t.string(),
+      dateOfBirth: t.field({ type: 'Date' }),
+      gender: t.field({ type: Gender }),
+    }),
+  }
+);
+
+schemaBuilder.mutationField('updateRegularUser', (t) =>
+  t.prismaField({
+    type: 'User',
+    args: {
+      id: t.arg.globalID({ required: true }),
+      input: t.arg({ type: RegularUserUpdateInput, required: true }),
+    },
+    resolve: async (query, _, args) =>
+      await prismaClient.user.update({
+        ...query,
+        where: { id: +args.id.id },
+        data: {
+          username: args.input.username ?? undefined,
+          name: args.input.name ?? undefined,
+          email: args.input.email ?? undefined,
+          dateOfBirth: args.input.dateOfBirth,
+          gender: args.input.gender,
+          hashedPassword: args.input.password
+            ? await hashPassword(args.input.password)
+            : undefined,
         },
       }),
   })
