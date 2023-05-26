@@ -109,14 +109,14 @@ model Movie {
   composers     CrewMember[]   @relation(name: "composer")
   actingCredits ActingCredit[]
 
-  reviews           Review[]
-  userScore         Float?
-  userReviewCount   Int          @default(0)
-  criticScore       Float?
-  criticReviewCount Int          @default(0)
-  viewedUsers       User[]
-  viewedUserCount   Int          @default(0)
-  collections       Collection[]
+  reviews            Review[]
+  regularScore       Float?
+  regularReviewCount Int          @default(0)
+  criticScore        Float?
+  criticReviewCount  Int          @default(0)
+  viewedUsers        User[]
+  viewedUserCount    Int          @default(0)
+  collections        Collection[]
 }
 
 model Review {

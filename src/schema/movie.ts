@@ -2,10 +2,10 @@ import { schemaBuilder } from '../schema-builder';
 import { prismaClient } from '../prisma-client';
 import { MovieSortBy } from './enums/movie-sort-by';
 import { SortDirection } from './enums/sort-direction';
-import { Prisma } from '@prisma/client';
+import { Prisma, UserType, User } from '@prisma/client';
 import { ReviewSortBy } from './enums/review-sort-by';
 
-export function createReviewsOrderByQuery(
+export function getReviewsOrderByQuery(
   sortByArgValue: ReviewSortBy | undefined | null,
   sortDirection: SortDirection | undefined | null
 ): Prisma.Enumerable<Prisma.ReviewOrderByWithRelationInput> | undefined {
@@ -46,7 +46,7 @@ schemaBuilder.prismaNode('Movie', {
     composers: t.relation('composers'),
     actingCredits: t.relation('actingCredits'),
 
-    reviews: t.relatedConnection('reviews', {
+    criticReviews: t.relatedConnection('reviews', {
       cursor: 'id',
       args: {
         textContains: t.arg.string(),
@@ -57,6 +57,7 @@ schemaBuilder.prismaNode('Movie', {
       },
       query: (args) => ({
         where: {
+          authorType: UserType.Critic,
           score: { gte: args.minScore ?? 0, lte: args.maxScore ?? 10 },
           OR: [
             {
@@ -70,12 +71,41 @@ schemaBuilder.prismaNode('Movie', {
             },
           ],
         },
-        orderBy: createReviewsOrderByQuery(args.sortBy, args.sortDirection),
+        orderBy: getReviewsOrderByQuery(args.sortBy, args.sortDirection),
       }),
     }),
 
-    userScore: t.exposeFloat('userScore', { nullable: true }),
-    userReviewCount: t.exposeInt('userReviewCount'),
+    regularReviews: t.relatedConnection('reviews', {
+      cursor: 'id',
+      args: {
+        textContains: t.arg.string(),
+        minScore: t.arg.int(),
+        maxScore: t.arg.int(),
+        sortBy: t.arg({ type: ReviewSortBy }),
+        sortDirection: t.arg({ type: SortDirection }),
+      },
+      query: (args) => ({
+        where: {
+          authorType: UserType.Regular,
+          score: { gte: args.minScore ?? 0, lte: args.maxScore ?? 10 },
+          OR: [
+            {
+              title: { contains: args.textContains ?? '', mode: 'insensitive' },
+            },
+            {
+              content: {
+                contains: args.textContains ?? '',
+                mode: 'insensitive',
+              },
+            },
+          ],
+        },
+        orderBy: getReviewsOrderByQuery(args.sortBy, args.sortDirection),
+      }),
+    }),
+
+    regularScore: t.exposeFloat('regularScore', { nullable: true }),
+    regularReviewCount: t.exposeInt('regularReviewCount'),
     criticScore: t.exposeFloat('criticScore', { nullable: true }),
     criticReviewCount: t.exposeInt('criticReviewCount'),
     viewedUsers: t.relatedConnection('viewedUsers', { cursor: 'id' }),
@@ -84,7 +114,7 @@ schemaBuilder.prismaNode('Movie', {
   }),
 });
 
-function createMoviesOrderByQuery(
+function getMoviesOrderByQuery(
   sortByArgValue: MovieSortBy | undefined | null,
   sortDirection: SortDirection | undefined | null
 ): Prisma.Enumerable<Prisma.MovieOrderByWithRelationInput> | undefined {
@@ -100,7 +130,7 @@ function createMoviesOrderByQuery(
     case MovieSortBy.criticScore:
       return { criticScore: orderByDirection };
     case MovieSortBy.regularScore:
-      return { userScore: orderByDirection };
+      return { regularScore: orderByDirection };
     case MovieSortBy.viewedUserCount:
       return { viewedUserCount: orderByDirection };
   }
@@ -137,12 +167,12 @@ schemaBuilder.queryFields((t) => ({
             lte: args.maxCriticScore ?? 10,
             gte: args.minCriticScore ?? 0,
           },
-          userScore: {
+          regularScore: {
             lte: args.maxRegularScore ?? 10,
             gte: args.minRegularScore ?? 0,
           },
         },
-        orderBy: createMoviesOrderByQuery(args.sortBy, args.sortDirection),
+        orderBy: getMoviesOrderByQuery(args.sortBy, args.sortDirection),
       }),
   }),
   movie: t.prismaField({

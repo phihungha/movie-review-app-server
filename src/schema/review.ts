@@ -64,8 +64,8 @@ async function updateAggregateData(txClient: any, review: Review) {
     };
   } else {
     dataQuery = {
-      userScore: aggregateScore,
-      userReviewCount: reviewCount,
+      regularScore: aggregateScore,
+      regularReviewCount: reviewCount,
     };
   }
 

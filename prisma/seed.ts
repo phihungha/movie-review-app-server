@@ -187,8 +187,8 @@ async function main() {
         },
       },
 
-      userScore: 6.6,
-      userReviewCount: 3,
+      regularScore: 6.6,
+      regularReviewCount: 3,
       criticScore: 6.5,
       criticReviewCount: 2,
     },
@@ -240,8 +240,8 @@ async function main() {
         },
       },
 
-      userScore: 9,
-      userReviewCount: 3,
+      regularScore: 9,
+      regularReviewCount: 3,
       criticScore: 8,
       criticReviewCount: 1,
     },

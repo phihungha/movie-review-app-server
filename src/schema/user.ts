@@ -2,7 +2,7 @@ import { schemaBuilder } from '../schema-builder';
 import { Gender, UserType } from '@prisma/client';
 import { ReviewSortBy } from './enums/review-sort-by';
 import { SortDirection } from './enums/sort-direction';
-import { createReviewsOrderByQuery } from './movie';
+import { getReviewsOrderByQuery } from './movie';
 import { prismaClient } from '../prisma-client';
 import bcrypt from 'bcrypt';
 
@@ -53,7 +53,7 @@ schemaBuilder.prismaNode('User', {
             },
           ],
         },
-        orderBy: createReviewsOrderByQuery(args.sortBy, args.sortDirection),
+        orderBy: getReviewsOrderByQuery(args.sortBy, args.sortDirection),
       }),
     }),
 

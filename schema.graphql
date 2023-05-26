@@ -276,17 +276,7 @@ type Movie implements Node {
   ): MovieCollectionsConnection!
   composers: [CrewMember!]!
   criticReviewCount: Int!
-  criticScore: Float
-  directors: [CrewMember!]!
-  distributedCompanies: [Company!]!
-  dops: [CrewMember!]!
-  editors: [CrewMember!]!
-  genres: [Genre!]!
-  id: ID!
-  posterUrl: String
-  productionCompanies: [Company!]!
-  releaseDate: Date!
-  reviews(
+  criticReviews(
     after: ID
     before: ID
     first: Int
@@ -296,11 +286,32 @@ type Movie implements Node {
     sortBy: ReviewSortBy
     sortDirection: SortDirection
     textContains: String
-  ): MovieReviewsConnection!
+  ): MovieCriticReviewsConnection!
+  criticScore: Float
+  directors: [CrewMember!]!
+  distributedCompanies: [Company!]!
+  dops: [CrewMember!]!
+  editors: [CrewMember!]!
+  genres: [Genre!]!
+  id: ID!
+  posterUrl: String
+  productionCompanies: [Company!]!
+  regularReviewCount: Int!
+  regularReviews(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+    maxScore: Int
+    minScore: Int
+    sortBy: ReviewSortBy
+    sortDirection: SortDirection
+    textContains: String
+  ): MovieRegularReviewsConnection!
+  regularScore: Float
+  releaseDate: Date!
   runningTime: Int!
   title: String!
-  userReviewCount: Int!
-  userScore: Float
   viewedUserCount: Int!
   viewedUsers(
     after: ID
@@ -321,12 +332,22 @@ type MovieCollectionsConnectionEdge {
   node: Collection!
 }
 
-type MovieReviewsConnection {
-  edges: [MovieReviewsConnectionEdge]!
+type MovieCriticReviewsConnection {
+  edges: [MovieCriticReviewsConnectionEdge]!
   pageInfo: PageInfo!
 }
 
-type MovieReviewsConnectionEdge {
+type MovieCriticReviewsConnectionEdge {
+  cursor: ID!
+  node: Review!
+}
+
+type MovieRegularReviewsConnection {
+  edges: [MovieRegularReviewsConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type MovieRegularReviewsConnectionEdge {
   cursor: ID!
   node: Review!
 }
