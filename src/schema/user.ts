@@ -1,5 +1,5 @@
 import { schemaBuilder } from '../schema-builder';
-import { Gender, UserType, User } from '@prisma/client';
+import { Gender, UserType } from '@prisma/client';
 import { ReviewSortBy } from './enums/review-sort-by';
 import { SortDirection } from './enums/sort-direction';
 import { createReviewsOrderByQuery } from './movie';
@@ -197,15 +197,14 @@ const CriticUserUpdateInput = schemaBuilder.inputType('CriticUserUpdateInput', {
 schemaBuilder.mutationField('updateCriticUser', (t) =>
   t.prismaField({
     type: 'User',
-    authScopes: { user: true },
+    authScopes: { criticUser: true },
     args: {
-      id: t.arg.globalID({ required: true }),
       input: t.arg({ type: CriticUserUpdateInput, required: true }),
     },
-    resolve: async (query, _, args) =>
+    resolve: async (query, _, args, context) =>
       await prismaClient.user.update({
         ...query,
-        where: { id: +args.id.id },
+        where: { id: context.currentUser!.id },
         data: {
           username: args.input.username ?? undefined,
           name: args.input.name ?? undefined,
@@ -238,15 +237,14 @@ const RegularUserUpdateInput = schemaBuilder.inputType(
 schemaBuilder.mutationField('updateRegularUser', (t) =>
   t.prismaField({
     type: 'User',
-    authScopes: { user: true },
+    authScopes: { regularUser: true },
     args: {
-      id: t.arg.globalID({ required: true }),
       input: t.arg({ type: RegularUserUpdateInput, required: true }),
     },
-    resolve: async (query, _, args) =>
+    resolve: async (query, _, args, context) =>
       await prismaClient.user.update({
         ...query,
-        where: { id: +args.id.id },
+        where: { id: context.currentUser!.id },
         data: {
           username: args.input.username ?? undefined,
           name: args.input.name ?? undefined,

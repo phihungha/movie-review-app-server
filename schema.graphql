@@ -361,8 +361,8 @@ type Mutation {
   markMovieAsViewed(id: ID!, isViewed: Boolean!): Movie!
   regularSignUp(input: RegularSignUpInput!): User!
   thankReview(reviewId: ID!, thank: Boolean!): Review!
-  updateCriticUser(id: ID!, input: CriticUserUpdateInput!): User!
-  updateRegularUser(id: ID!, input: RegularUserUpdateInput!): User!
+  updateCriticUser(input: CriticUserUpdateInput!): User!
+  updateRegularUser(input: RegularUserUpdateInput!): User!
 }
 
 interface Node {

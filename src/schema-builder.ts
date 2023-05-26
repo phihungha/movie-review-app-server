@@ -7,6 +7,7 @@ import PrismaPlugin from '@pothos/plugin-prisma';
 import type PrismaTypes from '@pothos/plugin-prisma/generated';
 import { Context } from './types';
 import { prismaClient } from './prisma-client';
+import { UserType } from '@prisma/client';
 
 export const schemaBuilder = new SchemaBuilder<{
   Context: Context;
@@ -26,7 +27,8 @@ export const schemaBuilder = new SchemaBuilder<{
   };
   PrismaTypes: PrismaTypes;
   AuthScopes: {
-    user: boolean;
+    regularUser: boolean;
+    criticUser: boolean;
   };
 }>({
   plugins: [
@@ -41,7 +43,8 @@ export const schemaBuilder = new SchemaBuilder<{
     cursorType: 'ID',
   },
   authScopes: (context) => ({
-    user: context.currentUser ? true : false,
+    criticUser: context.currentUser?.userType === UserType.Critic,
+    regularUser: context.currentUser?.userType === UserType.Regular,
   }),
   errorOptions: {
     defaultTypes: [],

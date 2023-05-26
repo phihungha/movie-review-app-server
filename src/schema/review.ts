@@ -88,7 +88,7 @@ const CreateReviewInput = schemaBuilder.inputType('CreateReviewInput', {
 schemaBuilder.mutationField('createReview', (t) =>
   t.prismaField({
     type: 'Review',
-    authScopes: { user: true },
+    authScopes: { regularUser: true, criticUser: true },
     args: {
       input: t.arg({ type: CreateReviewInput, required: true }),
     },
@@ -124,7 +124,7 @@ const EditReviewInput = schemaBuilder.inputType('EditReviewInput', {
 schemaBuilder.mutationField('editReview', (t) =>
   t.prismaField({
     type: 'Review',
-    authScopes: { user: true },
+    authScopes: { regularUser: true, criticUser: true },
     args: {
       id: t.arg.globalID({ required: true }),
       input: t.arg({ type: EditReviewInput, required: true }),
@@ -146,7 +146,7 @@ schemaBuilder.mutationField('editReview', (t) =>
 schemaBuilder.mutationField('deleteReview', (t) =>
   t.prismaField({
     type: 'Review',
-    authScopes: { user: true },
+    authScopes: { regularUser: true, criticUser: true },
     args: {
       id: t.arg.globalID({ required: true }),
     },
@@ -165,7 +165,7 @@ schemaBuilder.mutationField('deleteReview', (t) =>
 schemaBuilder.mutationField('thankReview', (t) =>
   t.prismaField({
     type: 'Review',
-    authScopes: { user: true },
+    authScopes: { regularUser: true, criticUser: true },
     args: {
       reviewId: t.arg.globalID({ required: true }),
       thank: t.arg.boolean({ required: true }),

@@ -29,7 +29,7 @@ const CreateCommentInput = schemaBuilder.inputType('CreateCommentInput', {
 schemaBuilder.mutationField('createComment', (t) =>
   t.prismaField({
     type: 'Comment',
-    authScopes: { user: true },
+    authScopes: { regularUser: true, criticUser: true },
     args: {
       input: t.arg({ type: CreateCommentInput, required: true }),
     },
@@ -64,7 +64,7 @@ const EditCommentInput = schemaBuilder.inputType('EditCommentInput', {
 schemaBuilder.mutationField('editComment', (t) =>
   t.prismaField({
     type: 'Comment',
-    authScopes: { user: true },
+    authScopes: { regularUser: true, criticUser: true },
     args: {
       id: t.arg.globalID({ required: true }),
       input: t.arg({ type: EditCommentInput, required: true }),
@@ -84,7 +84,7 @@ schemaBuilder.mutationField('editComment', (t) =>
 schemaBuilder.mutationField('deleteComment', (t) =>
   t.prismaField({
     type: 'Comment',
-    authScopes: { user: true },
+    authScopes: { regularUser: true, criticUser: true },
     args: {
       id: t.arg.globalID({ required: true }),
     },

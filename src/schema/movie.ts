@@ -162,7 +162,7 @@ schemaBuilder.queryFields((t) => ({
 schemaBuilder.mutationFields((t) => ({
   markMovieAsViewed: t.prismaField({
     type: 'Movie',
-    authScopes: { user: true },
+    authScopes: { regularUser: true, criticUser: true },
     args: {
       id: t.arg.globalID({ required: true }),
       isViewed: t.arg.boolean({ required: true }),
