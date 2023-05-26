@@ -238,6 +238,7 @@ const RegularUserUpdateInput = schemaBuilder.inputType(
 schemaBuilder.mutationField('updateRegularUser', (t) =>
   t.prismaField({
     type: 'User',
+    authScopes: { user: true },
     args: {
       id: t.arg.globalID({ required: true }),
       input: t.arg({ type: RegularUserUpdateInput, required: true }),

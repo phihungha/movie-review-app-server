@@ -358,6 +358,7 @@ type Mutation {
   editComment(id: ID!, input: EditCommentInput!): Comment!
   editReview(id: ID!, input: EditReviewInput!): Review!
   login(password: String!, username: String!): AuthResult!
+  markMovieAsViewed(id: ID!, isViewed: Boolean!): Movie!
   regularSignUp(input: RegularSignUpInput!): User!
   thankReview(reviewId: ID!, thank: Boolean!): Review!
   updateCriticUser(id: ID!, input: CriticUserUpdateInput!): User!

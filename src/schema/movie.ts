@@ -158,3 +158,44 @@ schemaBuilder.queryFields((t) => ({
       }),
   }),
 }));
+
+schemaBuilder.mutationFields((t) => ({
+  markMovieAsViewed: t.prismaField({
+    type: 'Movie',
+    authScopes: { user: true },
+    args: {
+      id: t.arg.globalID({ required: true }),
+      isViewed: t.arg.boolean({ required: true }),
+    },
+    resolve: async (query, _, args, context) =>
+      prismaClient.$transaction(async (client) => {
+        let viewedUsersUpdateQuery;
+        if (args.isViewed) {
+          viewedUsersUpdateQuery = {
+            connect: { id: context.currentUser!.id },
+          };
+        } else {
+          viewedUsersUpdateQuery = {
+            disconnect: { id: context.currentUser!.id },
+          };
+        }
+        const movie = await client.movie.update({
+          select: {
+            _count: {
+              select: {
+                viewedUsers: true,
+              },
+            },
+          },
+          where: { id: +args.id.id },
+          data: { viewedUsers: viewedUsersUpdateQuery },
+        });
+
+        return await client.movie.update({
+          ...query,
+          where: { id: +args.id.id },
+          data: { viewedUserCount: movie._count.viewedUsers },
+        });
+      }),
+  }),
+}));
