@@ -1,6 +1,6 @@
 import { Review, UserType } from '@prisma/client';
 import { schemaBuilder } from '../schema-builder';
-import { prismaClient } from '../prisma-client';
+import { prismaClient } from '../api-clients';
 
 schemaBuilder.prismaNode('Review', {
   id: { field: 'id' },

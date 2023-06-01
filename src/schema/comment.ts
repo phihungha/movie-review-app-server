@@ -1,4 +1,4 @@
-import { prismaClient } from '../prisma-client';
+import { prismaClient } from '../api-clients';
 import { schemaBuilder } from '../schema-builder';
 
 schemaBuilder.prismaNode('Comment', {

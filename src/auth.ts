@@ -1,4 +1,4 @@
-import { prismaClient } from './prisma-client';
+import { prismaClient } from './api-clients';
 import JsonWebToken from 'jsonwebtoken';
 import { NoJwtSecretError } from './errors';
 import { User } from '@prisma/client';

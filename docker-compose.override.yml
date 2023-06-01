@@ -7,6 +7,7 @@ services:
       - JWT_SECRET=${JWT_SECRET:-By6nEuzserO3Zu2vsKbd}
     volumes:
       - .:/app
+      - ${HOME}/.aws:/root/.aws:ro
       - /app/node_modules
     command: npm run dev
 

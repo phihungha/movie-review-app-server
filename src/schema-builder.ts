@@ -6,7 +6,7 @@ import ValidationPlugin from '@pothos/plugin-validation';
 import PrismaPlugin from '@pothos/plugin-prisma';
 import type PrismaTypes from '@pothos/plugin-prisma/generated';
 import { Context } from './types';
-import { prismaClient } from './prisma-client';
+import { prismaClient } from './api-clients';
 import { UserType } from '@prisma/client';
 
 export const schemaBuilder = new SchemaBuilder<{

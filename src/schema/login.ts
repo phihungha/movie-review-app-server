@@ -1,6 +1,6 @@
 import JsonWebToken from 'jsonwebtoken';
 import { schemaBuilder } from '../schema-builder';
-import { prismaClient } from '../prisma-client';
+import { prismaClient } from '../api-clients';
 import bcrypt from 'bcrypt';
 import { AuthError } from '../errors';
 

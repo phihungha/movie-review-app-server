@@ -1,5 +1,5 @@
 import { schemaBuilder } from '../schema-builder';
-import { prismaClient } from '../prisma-client';
+import { prismaClient } from '../api-clients';
 import { MovieSortBy } from './enums/movie-sort-by';
 import { SortDirection } from './enums/sort-direction';
 import { Prisma, UserType, User } from '@prisma/client';

@@ -3,7 +3,7 @@ import { Gender, UserType } from '@prisma/client';
 import { ReviewSortBy } from './enums/review-sort-by';
 import { SortDirection } from './enums/sort-direction';
 import { getReviewsOrderByQuery } from './movie';
-import { prismaClient } from '../prisma-client';
+import { prismaClient } from '../api-clients';
 import bcrypt from 'bcrypt';
 
 schemaBuilder.prismaNode('User', {
