@@ -26,8 +26,14 @@ const CreateCommentInput = schemaBuilder.inputType('CreateCommentInput', {
   }),
 });
 
-schemaBuilder.mutationField('createComment', (t) =>
-  t.prismaField({
+const EditCommentInput = schemaBuilder.inputType('EditCommentInput', {
+  fields: (t) => ({
+    content: t.string({ required: true }),
+  }),
+});
+
+schemaBuilder.mutationFields((t) => ({
+  createComment: t.prismaField({
     type: 'Comment',
     authScopes: { regularUser: true, criticUser: true },
     args: {
@@ -52,17 +58,8 @@ schemaBuilder.mutationField('createComment', (t) =>
           }),
         ])
       )[0],
-  })
-);
-
-const EditCommentInput = schemaBuilder.inputType('EditCommentInput', {
-  fields: (t) => ({
-    content: t.string({ required: true }),
   }),
-});
-
-schemaBuilder.mutationField('editComment', (t) =>
-  t.prismaField({
+  editComment: t.prismaField({
     type: 'Comment',
     authScopes: { regularUser: true, criticUser: true },
     args: {
@@ -78,11 +75,8 @@ schemaBuilder.mutationField('editComment', (t) =>
           lastUpdateTime: new Date(),
         },
       }),
-  })
-);
-
-schemaBuilder.mutationField('deleteComment', (t) =>
-  t.prismaField({
+  }),
+  deleteComment: t.prismaField({
     type: 'Comment',
     authScopes: { regularUser: true, criticUser: true },
     args: {
@@ -110,5 +104,5 @@ schemaBuilder.mutationField('deleteComment', (t) =>
 
         return comment;
       }),
-  })
-);
+  }),
+}));

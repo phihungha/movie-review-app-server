@@ -85,34 +85,6 @@ const CreateReviewInput = schemaBuilder.inputType('CreateReviewInput', {
   }),
 });
 
-schemaBuilder.mutationField('createReview', (t) =>
-  t.prismaField({
-    type: 'Review',
-    authScopes: { regularUser: true, criticUser: true },
-    args: {
-      input: t.arg({ type: CreateReviewInput, required: true }),
-    },
-    resolve: (query, _, args, context) =>
-      prismaClient.$transaction(async (client) => {
-        const authorType = context.currentUser!.userType;
-        const review = await client.review.create({
-          ...query,
-          data: {
-            title: args.input.title,
-            content: args.input.content,
-            score: args.input.score,
-            movie: { connect: { id: +args.input.movieId.id } },
-            author: { connect: { id: context.currentUser!.id } },
-            authorType,
-            externalUrl: args.input.externalUrl,
-          },
-        });
-        await updateAggregateData(client, review);
-        return review;
-      }),
-  })
-);
-
 const EditReviewInput = schemaBuilder.inputType('EditReviewInput', {
   fields: (t) => ({
     title: t.string(),
@@ -120,47 +92,6 @@ const EditReviewInput = schemaBuilder.inputType('EditReviewInput', {
     externalUrl: t.string(),
   }),
 });
-
-schemaBuilder.mutationField('editReview', (t) =>
-  t.prismaField({
-    type: 'Review',
-    authScopes: { regularUser: true, criticUser: true },
-    args: {
-      id: t.arg.globalID({ required: true }),
-      input: t.arg({ type: EditReviewInput, required: true }),
-    },
-    resolve: (query, _, args) =>
-      prismaClient.review.update({
-        ...query,
-        where: { id: +args.id.id },
-        data: {
-          title: args.input.title ?? undefined,
-          content: args.input.content ?? undefined,
-          externalUrl: args.input.externalUrl,
-          lastUpdateTime: new Date(),
-        },
-      }),
-  })
-);
-
-schemaBuilder.mutationField('deleteReview', (t) =>
-  t.prismaField({
-    type: 'Review',
-    authScopes: { regularUser: true, criticUser: true },
-    args: {
-      id: t.arg.globalID({ required: true }),
-    },
-    resolve: (query, _, args) =>
-      prismaClient.$transaction(async (client) => {
-        const review = await prismaClient.review.delete({
-          ...query,
-          where: { id: +args.id.id },
-        });
-        await updateAggregateData(client, review);
-        return review;
-      }),
-  })
-);
 
 schemaBuilder.mutationField('thankReview', (t) =>
   t.prismaField({
@@ -199,3 +130,66 @@ schemaBuilder.mutationField('thankReview', (t) =>
     },
   })
 );
+
+schemaBuilder.mutationFields((t) => ({
+  createReview: t.prismaField({
+    type: 'Review',
+    authScopes: { regularUser: true, criticUser: true },
+    args: {
+      input: t.arg({ type: CreateReviewInput, required: true }),
+    },
+    resolve: (query, _, args, context) =>
+      prismaClient.$transaction(async (client) => {
+        const authorType = context.currentUser!.userType;
+        const review = await client.review.create({
+          ...query,
+          data: {
+            title: args.input.title,
+            content: args.input.content,
+            score: args.input.score,
+            movie: { connect: { id: +args.input.movieId.id } },
+            author: { connect: { id: context.currentUser!.id } },
+            authorType,
+            externalUrl: args.input.externalUrl,
+          },
+        });
+        await updateAggregateData(client, review);
+        return review;
+      }),
+  }),
+  editReview: t.prismaField({
+    type: 'Review',
+    authScopes: { regularUser: true, criticUser: true },
+    args: {
+      id: t.arg.globalID({ required: true }),
+      input: t.arg({ type: EditReviewInput, required: true }),
+    },
+    resolve: (query, _, args) =>
+      prismaClient.review.update({
+        ...query,
+        where: { id: +args.id.id },
+        data: {
+          title: args.input.title ?? undefined,
+          content: args.input.content ?? undefined,
+          externalUrl: args.input.externalUrl,
+          lastUpdateTime: new Date(),
+        },
+      }),
+  }),
+  deleteReview: t.prismaField({
+    type: 'Review',
+    authScopes: { regularUser: true, criticUser: true },
+    args: {
+      id: t.arg.globalID({ required: true }),
+    },
+    resolve: (query, _, args) =>
+      prismaClient.$transaction(async (client) => {
+        const review = await prismaClient.review.delete({
+          ...query,
+          where: { id: +args.id.id },
+        });
+        await updateAggregateData(client, review);
+        return review;
+      }),
+  }),
+}));

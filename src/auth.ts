@@ -3,6 +3,10 @@ import JsonWebToken from 'jsonwebtoken';
 import { NoJwtSecretError } from './errors';
 import { User } from '@prisma/client';
 
+if (!process.env.JWT_SECRET) {
+  throw new NoJwtSecretError();
+}
+
 export async function authenticate(authField?: string): Promise<User | null> {
   if (!authField) {
     return null;
@@ -13,10 +17,7 @@ export async function authenticate(authField?: string): Promise<User | null> {
     return null;
   }
 
-  if (!process.env.JWT_SECRET) {
-    throw new NoJwtSecretError();
-  }
-  const payload = JsonWebToken.verify(accessToken, process.env.JWT_SECRET);
+  const payload = JsonWebToken.verify(accessToken, process.env.JWT_SECRET!);
   if (!payload.sub) {
     return null;
   }

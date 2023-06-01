@@ -5,6 +5,8 @@ services:
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@postgres-db:5432/${POSTGRES_DB:-app}?schema=public
       - JWT_SECRET=${JWT_SECRET:-By6nEuzserO3Zu2vsKbd}
+      - AWS_PROFILE=${AWS_PROFILE}
+      - S3_BUCKET=cinerate-movie-review
     volumes:
       - .:/app
       - ${HOME}/.aws:/root/.aws:ro

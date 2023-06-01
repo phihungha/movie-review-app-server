@@ -3,8 +3,10 @@ import { Gender, UserType } from '@prisma/client';
 import { ReviewSortBy } from './enums/review-sort-by';
 import { SortDirection } from './enums/sort-direction';
 import { getReviewsOrderByQuery } from './movie';
-import { prismaClient } from '../api-clients';
+import { prismaClient, s3Client } from '../api-clients';
 import bcrypt from 'bcrypt';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 schemaBuilder.prismaNode('User', {
   id: { field: 'id' },
@@ -106,6 +108,16 @@ schemaBuilder.queryFields((t) => ({
         where: { id: +args.id.id },
       }),
   }),
+  userProfileImageUploadUrl: t.string({
+    authScopes: { criticUser: true, regularUser: true },
+    resolve: (parent, args, context) => {
+      const command = new PutObjectCommand({
+        Bucket: process.env.S3_BUCKET,
+        Key: 'public/userProfileImages/' + context.currentUser!.id,
+      });
+      return getSignedUrl(s3Client, command, { expiresIn: 3600 });
+    },
+  }),
 }));
 
 async function hashPassword(password: string): Promise<string> {
@@ -125,8 +137,47 @@ const CriticSignUpInput = schemaBuilder.inputType('CriticSignUpInput', {
   }),
 });
 
-schemaBuilder.mutationField('criticSignUp', (t) =>
-  t.prismaField({
+const RegularSignUpInput = schemaBuilder.inputType('RegularSignUpInput', {
+  fields: (t) => ({
+    username: t.string({ required: true }),
+    email: t.string({ required: true }),
+    name: t.string({ required: true }),
+    password: t.string({ required: true }),
+    dateOfBirth: t.field({ type: 'Date' }),
+    gender: t.field({ type: Gender }),
+  }),
+});
+
+const CriticUserUpdateInput = schemaBuilder.inputType('CriticUserUpdateInput', {
+  fields: (t) => ({
+    username: t.string(),
+    email: t.string(),
+    name: t.string(),
+    password: t.string(),
+    avatarUrl: t.string(),
+    dateOfBirth: t.field({ type: 'Date' }),
+    gender: t.field({ type: Gender }),
+    blogUrl: t.string(),
+  }),
+});
+
+const RegularUserUpdateInput = schemaBuilder.inputType(
+  'RegularUserUpdateInput',
+  {
+    fields: (t) => ({
+      username: t.string(),
+      email: t.string(),
+      name: t.string(),
+      password: t.string(),
+      avatarUrl: t.string(),
+      dateOfBirth: t.field({ type: 'Date' }),
+      gender: t.field({ type: Gender }),
+    }),
+  }
+);
+
+schemaBuilder.mutationFields((t) => ({
+  criticSignUp: t.prismaField({
     type: 'User',
     args: {
       input: t.arg({ type: CriticSignUpInput, required: true }),
@@ -145,22 +196,8 @@ schemaBuilder.mutationField('criticSignUp', (t) =>
           criticUser: { create: { blogUrl: args.input.blogUrl } },
         },
       }),
-  })
-);
-
-const RegularSignUpInput = schemaBuilder.inputType('RegularSignUpInput', {
-  fields: (t) => ({
-    username: t.string({ required: true }),
-    email: t.string({ required: true }),
-    name: t.string({ required: true }),
-    password: t.string({ required: true }),
-    dateOfBirth: t.field({ type: 'Date' }),
-    gender: t.field({ type: Gender }),
   }),
-});
-
-schemaBuilder.mutationField('regularSignUp', (t) =>
-  t.prismaField({
+  regularSignUp: t.prismaField({
     type: 'User',
     args: {
       input: t.arg({ type: RegularSignUpInput, required: true }),
@@ -179,23 +216,8 @@ schemaBuilder.mutationField('regularSignUp', (t) =>
           regularUser: { create: {} },
         },
       }),
-  })
-);
-
-const CriticUserUpdateInput = schemaBuilder.inputType('CriticUserUpdateInput', {
-  fields: (t) => ({
-    username: t.string(),
-    email: t.string(),
-    name: t.string(),
-    password: t.string(),
-    dateOfBirth: t.field({ type: 'Date' }),
-    gender: t.field({ type: Gender }),
-    blogUrl: t.string(),
   }),
-});
-
-schemaBuilder.mutationField('updateCriticUser', (t) =>
-  t.prismaField({
+  updateCriticUser: t.prismaField({
     type: 'User',
     authScopes: { criticUser: true },
     args: {
@@ -209,6 +231,7 @@ schemaBuilder.mutationField('updateCriticUser', (t) =>
           username: args.input.username ?? undefined,
           name: args.input.name ?? undefined,
           email: args.input.email ?? undefined,
+          avatarUrl: args.input.avatarUrl,
           dateOfBirth: args.input.dateOfBirth,
           gender: args.input.gender,
           hashedPassword: args.input.password
@@ -217,25 +240,8 @@ schemaBuilder.mutationField('updateCriticUser', (t) =>
           criticUser: { update: { blogUrl: args.input.blogUrl ?? undefined } },
         },
       }),
-  })
-);
-
-const RegularUserUpdateInput = schemaBuilder.inputType(
-  'RegularUserUpdateInput',
-  {
-    fields: (t) => ({
-      username: t.string(),
-      email: t.string(),
-      name: t.string(),
-      password: t.string(),
-      dateOfBirth: t.field({ type: 'Date' }),
-      gender: t.field({ type: Gender }),
-    }),
-  }
-);
-
-schemaBuilder.mutationField('updateRegularUser', (t) =>
-  t.prismaField({
+  }),
+  updateRegularUser: t.prismaField({
     type: 'User',
     authScopes: { regularUser: true },
     args: {
@@ -249,6 +255,7 @@ schemaBuilder.mutationField('updateRegularUser', (t) =>
           username: args.input.username ?? undefined,
           name: args.input.name ?? undefined,
           email: args.input.email ?? undefined,
+          avatarUrl: args.input.avatarUrl,
           dateOfBirth: args.input.dateOfBirth,
           gender: args.input.gender,
           hashedPassword: args.input.password
@@ -256,5 +263,5 @@ schemaBuilder.mutationField('updateRegularUser', (t) =>
             : undefined,
         },
       }),
-  })
-);
+  }),
+}));

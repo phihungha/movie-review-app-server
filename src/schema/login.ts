@@ -38,9 +38,6 @@ async function generateAccessToken(
   }
 
   const jwtPayload = { username, sub: user.id };
-  if (!process.env.JWT_SECRET) {
-    throw new AuthError('No JWT_SECRET configured');
-  }
   return JsonWebToken.sign(jwtPayload, process.env.JWT_SECRET!);
 }
 
