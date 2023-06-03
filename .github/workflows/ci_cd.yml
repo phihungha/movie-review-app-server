@@ -2,7 +2,7 @@ name: CI/CD
 
 on:
   push:
-    branches: [master, dev]
+    branches: [master]
 
 env:
   DOCKER_IMAGE_NAME: haphihung55/cinerate-api-server
