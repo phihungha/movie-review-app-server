@@ -10,6 +10,7 @@
     "format": "prettier --write .",
     "format-check": "prettier --check .",
     "lint": "eslint --fix --cache .",
+    "ci-lint": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky install",
     "migrate:dev": "prisma migrate dev",
