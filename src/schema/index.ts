@@ -1,9 +1,23 @@
 import { lexicographicSortSchema, printSchema } from 'graphql';
-import { schemaBuilder } from '../builder';
+import { schemaBuilder } from '../schema-builder';
 import { writeFileSync } from 'fs';
+import prettier from 'prettier';
 import './error';
-import './query';
+import './enums';
+import './scalars';
+import './genre';
+import './crew-member';
+import './acting-credit';
+import './company';
+import './movie';
+import './user';
+import './review';
+import './comment';
+import './collection';
+import './login';
+import './root';
 
 export const gqlSchema = schemaBuilder.toSchema();
 const schemaText = printSchema(lexicographicSortSchema(gqlSchema));
-writeFileSync('./schema.graphql', schemaText);
+const formattedSchemaText = prettier.format(schemaText, { parser: 'graphql' });
+writeFileSync('./schema.graphql', formattedSchemaText);

@@ -1,3 +1,5 @@
+import { User } from '@prisma/client';
+
 export interface Context {
-  currentUser: object;
+  currentUser: User | null;
 }

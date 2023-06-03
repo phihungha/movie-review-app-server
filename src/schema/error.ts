@@ -1,4 +1,4 @@
-import { schemaBuilder } from '../builder';
+import { schemaBuilder } from '../schema-builder';
 
 export const errorType = schemaBuilder.objectType(Error, {
   name: 'Error',
