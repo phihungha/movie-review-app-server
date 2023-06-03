@@ -35,6 +35,6 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG
-          cache-from: type=registry,ref=$DOCKER_IMAGE_NAME:buildcache
+          tags: ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }}
+          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=$DOCKER_IMAGE_NAME:buildcache,mode=max
