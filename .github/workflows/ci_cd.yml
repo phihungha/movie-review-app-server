@@ -4,12 +4,8 @@ on:
   push:
     branches: [main]
 
-env:
-  DOCKER_IMAGE_NAME: haphihung55/cinerate-api-server
-  DOCKER_IMAGE_TAG: latest
-
 jobs:
-  ci_cd:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -18,12 +14,18 @@ jobs:
         with:
           node-version: lts/*
           cache: npm
-      - name: Install
+      - name: Install dependencies
         run: npm ci
       - name: Lint
         run: npm run ci-lint
       - name: Check code formatting
         run: npm run format-check
+  deploy:
+    env:
+      DOCKER_IMAGE_NAME: haphihung55/cinerate-api-server
+      DOCKER_IMAGE_VERSION: latest
+    runs-on: ubuntu-latest
+    steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to Docker Hub
@@ -35,6 +37,27 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }}
+          tags: ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_VERSION }}
           cache-from: type=registry,ref=${{ env.DOCKER_IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.DOCKER_IMAGE_NAME }}:buildcache,mode=max
+      - name: Deploy Docker image on server
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USERNAME }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script_stop: true
+          script: |
+            docker pull ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_VERSION }}
+            docker compose restart
+      - name: Use latest Node.js LTS
+        uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Run database migration
+        run: npm run migrate:deploy
+        env:
+          DATABASE_URL: ${{ secrets.DB_CONNECTION_URL }}
