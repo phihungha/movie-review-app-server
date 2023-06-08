@@ -1,5 +1,5 @@
 services:
-  apollo-api-server:
+  cinerate-app-api-server:
     build:
       target: build
     environment:
@@ -13,7 +13,7 @@ services:
       - /app/node_modules
     command: npm run dev
 
-  postgres-db:
+  cinerate-app-db:
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-app}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-app}

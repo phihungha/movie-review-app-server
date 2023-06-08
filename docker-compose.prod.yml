@@ -1,5 +1,5 @@
 services:
-  apollo-api-server:
+  cinerate-app-api-server:
     restart: always
     environment:
       - NODE_ENV=production
@@ -9,7 +9,7 @@ services:
       - ${HOME}/.aws:/root/.aws:ro
     command: npm start
 
-  postgres-db:
+  cinerate-app-db:
     restart: always
     env_file:
       - .env

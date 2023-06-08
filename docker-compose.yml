@@ -1,6 +1,6 @@
 services:
-  apollo-api-server:
-    container_name: mra-apollo-api-server
+  cinerate-app-api-server:
+    container_name: cinerate-app-api-server
     build:
       context: .
       dockerfile: Dockerfile
@@ -9,10 +9,10 @@ services:
     environment:
       - SERVER_PORT=${SERVER_PORT:-3000}
     depends_on:
-      - postgres-db
+      - cinerate-app-db
 
-  postgres-db:
-    container_name: mra-postgres-db
+  cinerate-app-db:
+    container_name: cinerate-app-db
     image: postgres:15
     ports:
       - 5432:5432
@@ -21,4 +21,4 @@ services:
 
 volumes:
   db-data:
-    name: ${VOLUME_NAME:-mra-db-data}
+    name: ${VOLUME_NAME:-cinerate-app-db-data}
