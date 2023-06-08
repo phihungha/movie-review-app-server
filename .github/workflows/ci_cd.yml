@@ -50,6 +50,7 @@ jobs:
           script: |
             docker pull ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_VERSION }}
             docker compose up -d
+            docker image prune
       - uses: actions/checkout@v3
       - name: Use latest Node.js LTS
         uses: actions/setup-node@v3
