@@ -1,6 +1,7 @@
 import { Review, UserType } from '@prisma/client';
 import { schemaBuilder } from '../schema-builder';
 import { prismaClient } from '../api-clients';
+import { PrismaTxClient } from '../types';
 
 schemaBuilder.prismaNode('Review', {
   id: { field: 'id' },
@@ -44,7 +45,7 @@ schemaBuilder.queryField('review', (t) =>
   })
 );
 
-async function updateAggregateData(txClient: any, review: Review) {
+async function updateAggregateData(txClient: PrismaTxClient, review: Review) {
   const movieId = review.movieId;
   const authorType = review.authorType;
 
@@ -93,44 +94,6 @@ const EditReviewInput = schemaBuilder.inputType('EditReviewInput', {
   }),
 });
 
-schemaBuilder.mutationField('thankReview', (t) =>
-  t.prismaField({
-    type: 'Review',
-    authScopes: { regularUser: true, criticUser: true },
-    args: {
-      reviewId: t.arg.globalID({ required: true }),
-      thank: t.arg.boolean({ required: true }),
-    },
-    resolve: async (query, _, args, context) => {
-      const currentUserId = context.currentUser!.id;
-      const userIdData = { id: currentUserId };
-      const result = await prismaClient.review.update({
-        select: {
-          _count: {
-            select: {
-              thankUsers: true,
-            },
-          },
-        },
-        where: { id: +args.reviewId.id },
-        data: {
-          thankUsers: args.thank
-            ? { connect: userIdData }
-            : { disconnect: userIdData },
-        },
-      });
-      const thankCount = result._count.thankUsers;
-      return await prismaClient.review.update({
-        ...query,
-        where: { id: +args.reviewId.id },
-        data: {
-          thankCount,
-        },
-      });
-    },
-  })
-);
-
 schemaBuilder.mutationFields((t) => ({
   createReview: t.prismaField({
     type: 'Review',
@@ -140,7 +103,10 @@ schemaBuilder.mutationFields((t) => ({
     },
     resolve: (query, _, args, context) =>
       prismaClient.$transaction(async (client) => {
-        const authorType = context.currentUser!.userType;
+        // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
+        const currentUser = context.currentUser!;
+        const authorType = currentUser.userType;
+        const authorId = currentUser.id;
         const review = await client.review.create({
           ...query,
           data: {
@@ -148,7 +114,7 @@ schemaBuilder.mutationFields((t) => ({
             content: args.input.content,
             score: args.input.score,
             movie: { connect: { id: +args.input.movieId.id } },
-            author: { connect: { id: context.currentUser!.id } },
+            author: { connect: { id: authorId } },
             authorType,
             externalUrl: args.input.externalUrl,
           },
@@ -190,6 +156,43 @@ schemaBuilder.mutationFields((t) => ({
         });
         await updateAggregateData(client, review);
         return review;
+      }),
+  }),
+  thankReview: t.prismaField({
+    type: 'Review',
+    authScopes: { regularUser: true, criticUser: true },
+    args: {
+      reviewId: t.arg.globalID({ required: true }),
+      thank: t.arg.boolean({ required: true }),
+    },
+    resolve: (query, _, args, context) =>
+      prismaClient.$transaction(async (client) => {
+        // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
+        const currentUserId = context.currentUser!.id;
+        const userIdData = { id: currentUserId };
+        const result = await client.review.update({
+          select: {
+            _count: {
+              select: {
+                thankUsers: true,
+              },
+            },
+          },
+          where: { id: +args.reviewId.id },
+          data: {
+            thankUsers: args.thank
+              ? { connect: userIdData }
+              : { disconnect: userIdData },
+          },
+        });
+        const thankCount = result._count.thankUsers;
+        return client.review.update({
+          ...query,
+          where: { id: +args.reviewId.id },
+          data: {
+            thankCount,
+          },
+        });
       }),
   }),
 }));

@@ -39,25 +39,25 @@ schemaBuilder.mutationFields((t) => ({
     args: {
       input: t.arg({ type: CreateCommentInput, required: true }),
     },
-    resolve: async (query, _, args, context) =>
-      (
-        await prismaClient.$transaction([
-          prismaClient.comment.create({
-            ...query,
-            data: {
-              review: { connect: { id: +args.input.reviewId.id } },
-              author: { connect: { id: context.currentUser!.id } },
-              content: args.input.content,
-            },
-          }),
-          prismaClient.review.update({
-            where: { id: +args.input.reviewId.id },
-            data: {
-              commentCount: { increment: 1 },
-            },
-          }),
-        ])
-      )[0],
+    resolve: (query, _, args, context) =>
+      prismaClient.$transaction(async (client) => {
+        const review = await client.comment.create({
+          ...query,
+          data: {
+            review: { connect: { id: +args.input.reviewId.id } },
+            // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
+            author: { connect: { id: context.currentUser!.id } },
+            content: args.input.content,
+          },
+        });
+        client.review.update({
+          where: { id: +args.input.reviewId.id },
+          data: {
+            commentCount: { increment: 1 },
+          },
+        });
+        return review;
+      }),
   }),
   editComment: t.prismaField({
     type: 'Comment',

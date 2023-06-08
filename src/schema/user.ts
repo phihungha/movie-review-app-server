@@ -111,9 +111,11 @@ schemaBuilder.queryFields((t) => ({
   userProfileImageUploadUrl: t.string({
     authScopes: { criticUser: true, regularUser: true },
     resolve: (parent, args, context) => {
+      // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
+      const currentUserId = context.currentUser!.id;
       const command = new PutObjectCommand({
         Bucket: process.env.S3_BUCKET,
-        Key: 'public/userProfileImages/' + context.currentUser!.id,
+        Key: 'public/userProfileImages/' + currentUserId,
       });
       return getSignedUrl(s3Client, command, { expiresIn: 3600 });
     },
@@ -226,6 +228,7 @@ schemaBuilder.mutationFields((t) => ({
     resolve: async (query, _, args, context) =>
       await prismaClient.user.update({
         ...query,
+        // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
         where: { id: context.currentUser!.id },
         data: {
           username: args.input.username ?? undefined,
@@ -250,6 +253,7 @@ schemaBuilder.mutationFields((t) => ({
     resolve: async (query, _, args, context) =>
       await prismaClient.user.update({
         ...query,
+        // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
         where: { id: context.currentUser!.id },
         data: {
           username: args.input.username ?? undefined,

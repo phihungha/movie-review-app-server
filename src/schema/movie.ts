@@ -184,7 +184,7 @@ schemaBuilder.queryFields((t) => ({
   trendingMovies: t.prismaConnection({
     type: 'Movie',
     cursor: 'id',
-    resolve: (query, _) =>
+    resolve: (query) =>
       prismaClient.movie.findMany({
         ...query,
         where: {
@@ -198,7 +198,7 @@ schemaBuilder.queryFields((t) => ({
   justReleasedMovies: t.prismaConnection({
     type: 'Movie',
     cursor: 'id',
-    resolve: (query, _) =>
+    resolve: (query) =>
       prismaClient.movie.findMany({
         ...query,
         orderBy: { releaseDate: 'desc' },
@@ -228,14 +228,16 @@ schemaBuilder.mutationFields((t) => ({
     },
     resolve: async (query, _, args, context) =>
       prismaClient.$transaction(async (client) => {
+        // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
+        const userId = context.currentUser!.id;
         let viewedUsersUpdateQuery;
         if (args.isViewed) {
           viewedUsersUpdateQuery = {
-            connect: { id: context.currentUser!.id },
+            connect: { id: userId },
           };
         } else {
           viewedUsersUpdateQuery = {
-            disconnect: { id: context.currentUser!.id },
+            disconnect: { id: userId },
           };
         }
         const movie = await client.movie.update({
@@ -249,7 +251,6 @@ schemaBuilder.mutationFields((t) => ({
           where: { id: +args.id.id },
           data: { viewedUsers: viewedUsersUpdateQuery },
         });
-
         return await client.movie.update({
           ...query,
           where: { id: +args.id.id },

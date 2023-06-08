@@ -38,6 +38,7 @@ async function generateAccessToken(
   }
 
   const jwtPayload = { username, sub: user.id };
+  // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
   return JsonWebToken.sign(jwtPayload, process.env.JWT_SECRET!);
 }
 

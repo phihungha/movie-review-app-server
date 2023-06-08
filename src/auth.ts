@@ -17,6 +17,7 @@ export async function authenticate(authField?: string): Promise<User | null> {
     return null;
   }
 
+  // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
   const payload = JsonWebToken.verify(accessToken, process.env.JWT_SECRET!);
   if (!payload.sub) {
     return null;
