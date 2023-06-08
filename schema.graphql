@@ -295,6 +295,7 @@ type Movie implements Node {
   editors: [CrewMember!]!
   genres: [Genre!]!
   id: ID!
+  numberOfReviewsPerScore(authorType: UserType!, score: Int!): Int!
   posterUrl: String
   productionCompanies: [Company!]!
   regularReviewCount: Int!
@@ -310,6 +311,7 @@ type Movie implements Node {
     textContains: String
   ): MovieRegularReviewsConnection!
   regularScore: Float
+  regularScoreByCriteria(gender: Gender, maxAge: Int, minAge: Int): Float
   releaseDate: Date!
   runningTime: Int!
   title: String!

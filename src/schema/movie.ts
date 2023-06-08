@@ -2,8 +2,14 @@ import { schemaBuilder } from '../schema-builder';
 import { prismaClient } from '../api-clients';
 import { MovieSortBy } from './enums/movie-sort-by';
 import { SortDirection } from './enums/sort-direction';
-import { Prisma, UserType } from '@prisma/client';
+import { Gender, Prisma, UserType } from '@prisma/client';
 import { ReviewSortBy } from './enums/review-sort-by';
+
+function calcDateOfBirthFromAge(age: number): Date {
+  const today = new Date();
+  today.setFullYear(today.getFullYear() - age);
+  return today;
+}
 
 export function getReviewsOrderByQuery(
   sortByArgValue: ReviewSortBy | undefined | null,
@@ -108,6 +114,52 @@ schemaBuilder.prismaNode('Movie', {
     regularReviewCount: t.exposeInt('regularReviewCount'),
     criticScore: t.exposeFloat('criticScore', { nullable: true }),
     criticReviewCount: t.exposeInt('criticReviewCount'),
+    regularScoreByCriteria: t.float({
+      nullable: true,
+      args: {
+        gender: t.arg({ type: Gender }),
+        minAge: t.arg.int(),
+        maxAge: t.arg.int(),
+      },
+      resolve: async (parent, args) => {
+        const result = await prismaClient.review.aggregate({
+          _avg: {
+            score: true,
+          },
+          where: {
+            movieId: parent.id,
+            authorType: UserType.Regular,
+            author: {
+              gender: args.gender,
+              dateOfBirth: {
+                lte: args.minAge
+                  ? calcDateOfBirthFromAge(args.minAge)
+                  : undefined,
+                gte: args.maxAge
+                  ? calcDateOfBirthFromAge(args.maxAge)
+                  : undefined,
+              },
+            },
+          },
+        });
+        return result._avg.score;
+      },
+    }),
+    numberOfReviewsPerScore: t.int({
+      args: {
+        score: t.arg.int({ required: true }),
+        authorType: t.arg({ type: UserType, required: true }),
+      },
+      resolve: (parent, args) =>
+        prismaClient.review.count({
+          where: {
+            movieId: parent.id,
+            authorType: args.authorType,
+            score: args.score,
+          },
+        }),
+    }),
+
     viewedUsers: t.relatedConnection('viewedUsers', { cursor: 'id' }),
     viewedUserCount: t.exposeInt('viewedUserCount'),
     collections: t.relatedConnection('collections', { cursor: 'id' }),
