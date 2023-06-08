@@ -49,7 +49,7 @@ jobs:
           script_stop: true
           script: |
             docker pull ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_VERSION }}
-            docker compose restart
+            docker compose up -d
       - uses: actions/checkout@v3
       - name: Use latest Node.js LTS
         uses: actions/setup-node@v3
