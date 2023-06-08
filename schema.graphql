@@ -50,6 +50,12 @@ type CollectionMoviesConnectionEdge {
   node: Movie!
 }
 
+enum CollectionSortBy {
+  CreationDate
+  LikeCount
+  Name
+}
+
 type Comment implements Node {
   author: User!
   content: String!
@@ -374,16 +380,21 @@ type MovieViewedUsersConnectionEdge {
 }
 
 type Mutation {
+  addToCollection(id: ID!, movieIds: [ID!]!): Collection!
+  createCollection(name: String!): Collection!
   createComment(input: CreateCommentInput!): Comment!
   createReview(input: CreateReviewInput!): Review!
   criticSignUp(input: CriticSignUpInput!): User!
+  deleteCollection(id: ID!): Collection!
   deleteComment(id: ID!): Comment!
   deleteReview(id: ID!): Review!
+  editCollection(id: ID!, name: String!): Collection!
   editComment(id: ID!, input: EditCommentInput!): Comment!
   editReview(id: ID!, input: EditReviewInput!): Review!
   login(password: String!, username: String!): AuthResult!
   markMovieAsViewed(id: ID!, isViewed: Boolean!): Movie!
   regularSignUp(input: RegularSignUpInput!): User!
+  removeFromCollection(id: ID!, movieIds: [ID!]!): Collection!
   thankReview(reviewId: ID!, thank: Boolean!): Review!
   updateCriticUser(input: CriticUserUpdateInput!): User!
   updateRegularUser(input: RegularUserUpdateInput!): User!
@@ -401,6 +412,16 @@ type PageInfo {
 }
 
 type Query {
+  collection(id: ID!): Collection
+  collections(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+    nameContains: String
+    sortBy: CollectionSortBy
+    sortDirection: SortDirection
+  ): QueryCollectionsConnection!
   justReleasedMovies(
     after: ID
     before: ID
@@ -440,6 +461,16 @@ type Query {
     last: Int
     nameContains: String
   ): QueryUsersConnection!
+}
+
+type QueryCollectionsConnection {
+  edges: [QueryCollectionsConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type QueryCollectionsConnectionEdge {
+  cursor: ID!
+  node: Collection!
 }
 
 type QueryJustReleasedMoviesConnection {
