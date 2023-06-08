@@ -2,7 +2,7 @@ import { schemaBuilder } from '../schema-builder';
 import { prismaClient } from '../api-clients';
 import { MovieSortBy } from './enums/movie-sort-by';
 import { SortDirection } from './enums/sort-direction';
-import { Prisma, UserType, User } from '@prisma/client';
+import { Prisma, UserType } from '@prisma/client';
 import { ReviewSortBy } from './enums/review-sort-by';
 
 export function getReviewsOrderByQuery(
@@ -136,6 +136,12 @@ function getMoviesOrderByQuery(
   }
 }
 
+function calcTrendingDateLimit(): Date {
+  const today = new Date();
+  today.setDate(-7);
+  return today;
+}
+
 schemaBuilder.queryFields((t) => ({
   movies: t.prismaConnection({
     type: 'Movie',
@@ -173,6 +179,29 @@ schemaBuilder.queryFields((t) => ({
           },
         },
         orderBy: getMoviesOrderByQuery(args.sortBy, args.sortDirection),
+      }),
+  }),
+  trendingMovies: t.prismaConnection({
+    type: 'Movie',
+    cursor: 'id',
+    resolve: (query, _) =>
+      prismaClient.movie.findMany({
+        ...query,
+        where: {
+          releaseDate: { gte: calcTrendingDateLimit() },
+        },
+        orderBy: {
+          viewedUserCount: 'desc',
+        },
+      }),
+  }),
+  justReleasedMovies: t.prismaConnection({
+    type: 'Movie',
+    cursor: 'id',
+    resolve: (query, _) =>
+      prismaClient.movie.findMany({
+        ...query,
+        orderBy: { releaseDate: 'desc' },
       }),
   }),
   movie: t.prismaField({
