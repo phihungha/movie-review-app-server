@@ -461,6 +461,7 @@ type Query {
     last: Int
     nameContains: String
   ): QueryUsersConnection!
+  viewer: User
 }
 
 type QueryCollectionsConnection {

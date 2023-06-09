@@ -108,6 +108,15 @@ schemaBuilder.queryFields((t) => ({
         where: { id: +args.id.id },
       }),
   }),
+  viewer: t.prismaField({
+    type: 'User',
+    nullable: true,
+    resolve: (query, parent, args, context) =>
+      prismaClient.user.findUnique({
+        ...query,
+        where: { id: context.currentUser?.id },
+      }),
+  }),
   userProfileImageUploadUrl: t.string({
     authScopes: { criticUser: true, regularUser: true },
     resolve: (parent, args, context) => {
