@@ -45,6 +45,9 @@ async function generateAccessToken(
 schemaBuilder.mutationField('login', (t) =>
   t.field({
     type: AuthResult,
+    errors: {
+      types: [AuthError],
+    },
     args: {
       username: t.arg.string({ required: true }),
       password: t.arg.string({ required: true }),

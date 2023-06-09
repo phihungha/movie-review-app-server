@@ -1,8 +1,18 @@
+import { AuthError } from '../errors';
 import { schemaBuilder } from '../schema-builder';
 
-export const errorType = schemaBuilder.objectType(Error, {
-  name: 'Error',
+const ErrorInterface = schemaBuilder.interfaceRef<Error>('Error').implement({
   fields: (t) => ({
-    message: t.exposeString('name'),
+    message: t.exposeString('message'),
   }),
+});
+
+schemaBuilder.objectType(Error, {
+  name: 'BaseError',
+  interfaces: [ErrorInterface],
+});
+
+schemaBuilder.objectType(AuthError, {
+  name: 'AuthError',
+  interfaces: [ErrorInterface],
 });

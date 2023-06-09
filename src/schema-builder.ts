@@ -47,7 +47,7 @@ export const schemaBuilder = new SchemaBuilder<{
     regularUser: context.currentUser?.userType === UserType.Regular,
   }),
   errorOptions: {
-    defaultTypes: [],
+    defaultTypes: [Error],
   },
   prisma: {
     client: prismaClient,
