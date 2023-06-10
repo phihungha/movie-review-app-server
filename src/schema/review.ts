@@ -1,7 +1,8 @@
-import { Review, UserType } from '@prisma/client';
+import { Prisma, Review, UserType } from '@prisma/client';
 import { schemaBuilder } from '../schema-builder';
 import { prismaClient } from '../api-clients';
 import { PrismaTxClient } from '../types';
+import { NotFoundError } from '../errors';
 
 schemaBuilder.prismaNode('Review', {
   id: { field: 'id' },
@@ -57,14 +58,14 @@ async function updateAggregateData(txClient: PrismaTxClient, review: Review) {
   const aggregateScore = aggregateResult._avg.score;
   const reviewCount = aggregateResult._count.id;
 
-  let dataQuery;
+  let updateData;
   if (authorType === UserType.Critic) {
-    dataQuery = {
+    updateData = {
       criticScore: aggregateScore,
       criticReviewCount: reviewCount,
     };
   } else {
-    dataQuery = {
+    updateData = {
       regularScore: aggregateScore,
       regularReviewCount: reviewCount,
     };
@@ -72,7 +73,7 @@ async function updateAggregateData(txClient: PrismaTxClient, review: Review) {
 
   await txClient.movie.update({
     where: { id: movieId },
-    data: { ...dataQuery },
+    data: { ...updateData },
   });
 }
 
@@ -98,6 +99,9 @@ schemaBuilder.mutationFields((t) => ({
   createReview: t.prismaField({
     type: 'Review',
     authScopes: { regularUser: true, criticUser: true },
+    errors: {
+      types: [NotFoundError],
+    },
     args: {
       input: t.arg({ type: CreateReviewInput, required: true }),
     },
@@ -105,62 +109,132 @@ schemaBuilder.mutationFields((t) => ({
       prismaClient.$transaction(async (client) => {
         // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
         const currentUser = context.currentUser!;
-        const authorType = currentUser.userType;
-        const authorId = currentUser.id;
-        const review = await client.review.create({
-          ...query,
-          data: {
-            title: args.input.title,
-            content: args.input.content,
-            score: args.input.score,
-            movie: { connect: { id: +args.input.movieId.id } },
-            author: { connect: { id: authorId } },
-            authorType,
-            externalUrl: args.input.externalUrl,
-          },
-        });
+
+        let review;
+        try {
+          review = await client.review.create({
+            ...query,
+            data: {
+              title: args.input.title,
+              content: args.input.content,
+              score: args.input.score,
+              movie: { connect: { id: +args.input.movieId.id } },
+              author: { connect: { id: currentUser.id } },
+              authorType: currentUser.userType,
+              externalUrl: args.input.externalUrl,
+            },
+          });
+        } catch (err) {
+          if (
+            err instanceof Prisma.PrismaClientKnownRequestError &&
+            err.code === 'P2025'
+          ) {
+            throw new NotFoundError('Movie not found');
+          } else {
+            throw err;
+          }
+        }
+
         await updateAggregateData(client, review);
+
         return review;
       }),
   }),
+
   editReview: t.prismaField({
     type: 'Review',
     authScopes: { regularUser: true, criticUser: true },
+    errors: {
+      types: [NotFoundError],
+    },
     args: {
       id: t.arg.globalID({ required: true }),
       input: t.arg({ type: EditReviewInput, required: true }),
     },
-    resolve: (query, _, args) =>
-      prismaClient.review.update({
-        ...query,
-        where: { id: +args.id.id },
-        data: {
-          title: args.input.title ?? undefined,
-          content: args.input.content ?? undefined,
-          externalUrl: args.input.externalUrl,
-          lastUpdateTime: new Date(),
-        },
-      }),
-  }),
-  deleteReview: t.prismaField({
-    type: 'Review',
-    authScopes: { regularUser: true, criticUser: true },
-    args: {
-      id: t.arg.globalID({ required: true }),
-    },
-    resolve: (query, _, args) =>
+    resolve: (query, _, args, context) =>
       prismaClient.$transaction(async (client) => {
-        const review = await prismaClient.review.delete({
-          ...query,
-          where: { id: +args.id.id },
-        });
-        await updateAggregateData(client, review);
+        // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
+        const currentUserId = context.currentUser!.id;
+
+        let review;
+        try {
+          review = await client.review.update({
+            ...query,
+            where: { id: +args.id.id },
+            data: {
+              title: args.input.title ?? undefined,
+              content: args.input.content ?? undefined,
+              externalUrl: args.input.externalUrl,
+              lastUpdateTime: new Date(),
+            },
+          });
+        } catch (err) {
+          if (
+            err instanceof Prisma.PrismaClientKnownRequestError &&
+            err.code === 'P2025'
+          ) {
+            throw new NotFoundError();
+          } else {
+            throw err;
+          }
+        }
+
+        if (review.authorId !== currentUserId) {
+          throw new NotFoundError();
+        }
+
         return review;
       }),
   }),
+
+  deleteReview: t.prismaField({
+    type: 'Review',
+    authScopes: { regularUser: true, criticUser: true },
+    errors: {
+      types: [NotFoundError],
+    },
+    args: {
+      id: t.arg.globalID({ required: true }),
+    },
+    resolve: (query, _, args, context) =>
+      prismaClient.$transaction(async (client) => {
+        // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
+        const currentUserId = context.currentUser!.id;
+        const id = +args.id.id;
+
+        let review;
+        try {
+          review = await client.review.delete({
+            ...query,
+            where: { id },
+          });
+        } catch (err) {
+          if (
+            err instanceof Prisma.PrismaClientKnownRequestError &&
+            err.code === 'P2025'
+          ) {
+            throw new NotFoundError();
+          } else {
+            throw err;
+          }
+        }
+
+        if (review.authorId !== currentUserId) {
+          throw new NotFoundError();
+        }
+
+        await updateAggregateData(client, review);
+
+        return review;
+      }),
+  }),
+
   thankReview: t.prismaField({
     type: 'Review',
     authScopes: { regularUser: true, criticUser: true },
+    errors: {
+      types: [NotFoundError],
+    },
     args: {
       reviewId: t.arg.globalID({ required: true }),
       thank: t.arg.boolean({ required: true }),
@@ -169,29 +243,42 @@ schemaBuilder.mutationFields((t) => ({
       prismaClient.$transaction(async (client) => {
         // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
         const currentUserId = context.currentUser!.id;
-        const userIdData = { id: currentUserId };
-        const result = await client.review.update({
-          select: {
-            _count: {
-              select: {
-                thankUsers: true,
+        const userIdUpdateData = { id: currentUserId };
+        const id = +args.reviewId.id;
+
+        let result;
+        try {
+          result = await client.review.update({
+            select: {
+              _count: {
+                select: {
+                  thankUsers: true,
+                },
               },
             },
-          },
-          where: { id: +args.reviewId.id },
-          data: {
-            thankUsers: args.thank
-              ? { connect: userIdData }
-              : { disconnect: userIdData },
-          },
-        });
+            where: { id },
+            data: {
+              thankUsers: args.thank
+                ? { connect: userIdUpdateData }
+                : { disconnect: userIdUpdateData },
+            },
+          });
+        } catch (err) {
+          if (
+            err instanceof Prisma.PrismaClientKnownRequestError &&
+            err.code === 'P2016'
+          ) {
+            throw new NotFoundError();
+          } else {
+            throw err;
+          }
+        }
+
         const thankCount = result._count.thankUsers;
-        return client.review.update({
+        return await client.review.update({
           ...query,
-          where: { id: +args.reviewId.id },
-          data: {
-            thankCount,
-          },
+          where: { id },
+          data: { thankCount },
         });
       }),
   }),

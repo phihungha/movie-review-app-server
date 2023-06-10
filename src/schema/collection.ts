@@ -3,6 +3,7 @@ import { prismaClient } from '../api-clients';
 import { schemaBuilder } from '../schema-builder';
 import { CollectionSortBy } from './enums/collection-sort-by';
 import { SortDirection } from './enums/sort-direction';
+import { NotFoundError } from '../errors';
 
 export function getCollectionsOrderByQuery(
   sortByArgValue: CollectionSortBy | undefined | null,
@@ -60,6 +61,7 @@ schemaBuilder.queryFields((t) => ({
         orderBy: getCollectionsOrderByQuery(args.sortBy, args.sortDirection),
       }),
   }),
+
   collection: t.prismaField({
     type: 'Collection',
     nullable: true,
@@ -91,64 +93,180 @@ schemaBuilder.mutationFields((t) => ({
         },
       }),
   }),
+
   editCollection: t.prismaField({
     type: 'Collection',
     authScopes: { regularUser: true, criticUser: true },
+    errors: {
+      types: [NotFoundError],
+    },
     args: {
       id: t.arg.globalID({ required: true }),
       name: t.arg.string({ required: true }),
     },
-    resolve: (query, _, args) =>
-      prismaClient.collection.update({
-        ...query,
-        where: { id: +args.id.id },
-        data: {
-          name: args.name,
-        },
+    resolve: (query, _, args, context) =>
+      prismaClient.$transaction(async (client) => {
+        // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
+        const currentUserId = context.currentUser!.id;
+        const id = +args.id.id;
+
+        let collection;
+        try {
+          collection = await client.collection.update({
+            ...query,
+            where: { id },
+            data: {
+              name: args.name,
+            },
+          });
+        } catch (err) {
+          if (
+            err instanceof Prisma.PrismaClientKnownRequestError &&
+            err.code === 'P2025'
+          ) {
+            throw new NotFoundError();
+          } else {
+            throw err;
+          }
+        }
+
+        if (collection.authorId !== currentUserId) {
+          throw new NotFoundError();
+        }
+
+        return collection;
       }),
   }),
+
   addToCollection: t.prismaField({
     type: 'Collection',
     authScopes: { regularUser: true, criticUser: true },
+    errors: {
+      types: [NotFoundError],
+    },
     args: {
       id: t.arg.globalID({ required: true }),
       movieIds: t.arg.globalIDList({ required: true }),
     },
-    resolve: (query, _, args) =>
-      prismaClient.collection.update({
-        ...query,
-        where: { id: +args.id.id },
-        data: {
-          movies: { connect: args.movieIds.map((m) => ({ id: +m.id })) },
-        },
+    resolve: (query, _, args, context) =>
+      prismaClient.$transaction(async (client) => {
+        // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
+        const currentUserId = context.currentUser!.id;
+        const id = +args.id.id;
+
+        let collection;
+        try {
+          collection = await client.collection.update({
+            ...query,
+            where: { id },
+            data: {
+              movies: {
+                connect: args.movieIds.map((movie) => ({ id: +movie.id })),
+              },
+            },
+          });
+        } catch (err) {
+          if (
+            err instanceof Prisma.PrismaClientKnownRequestError &&
+            err.code === 'P2025'
+          ) {
+            throw new NotFoundError();
+          } else {
+            throw err;
+          }
+        }
+
+        if (collection.authorId !== currentUserId) {
+          throw new NotFoundError();
+        }
+
+        return collection;
       }),
   }),
+
   removeFromCollection: t.prismaField({
     type: 'Collection',
     authScopes: { regularUser: true, criticUser: true },
+    errors: {
+      types: [NotFoundError],
+    },
     args: {
       id: t.arg.globalID({ required: true }),
       movieIds: t.arg.globalIDList({ required: true }),
     },
-    resolve: (query, _, args) =>
-      prismaClient.collection.update({
-        ...query,
-        where: { id: +args.id.id },
-        data: {
-          movies: { disconnect: args.movieIds.map((m) => ({ id: +m.id })) },
-        },
+    resolve: (query, _, args, context) =>
+      prismaClient.$transaction(async (client) => {
+        // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
+        const currentUserId = context.currentUser!.id;
+        const id = +args.id.id;
+
+        let collection;
+        try {
+          collection = await client.collection.update({
+            ...query,
+            where: { id },
+            data: {
+              movies: {
+                disconnect: args.movieIds.map((movie) => ({ id: +movie.id })),
+              },
+            },
+          });
+        } catch (err) {
+          if (
+            err instanceof Prisma.PrismaClientKnownRequestError &&
+            err.code === 'P2025'
+          ) {
+            throw new NotFoundError();
+          } else {
+            throw err;
+          }
+        }
+
+        if (collection.authorId !== currentUserId) {
+          throw new NotFoundError();
+        }
+
+        return collection;
       }),
   }),
+
   deleteCollection: t.prismaField({
     type: 'Collection',
+    errors: {
+      types: [NotFoundError],
+    },
     authScopes: { regularUser: true, criticUser: true },
     args: {
       id: t.arg.globalID({ required: true }),
     },
-    resolve: (query, _, args) =>
-      prismaClient.collection.delete({
-        ...query,
-        where: { id: +args.id.id },
+    resolve: (query, _, args, context) =>
+      prismaClient.$transaction(async (client) => {
+        // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
+        const currentUserId = context.currentUser!.id;
+        const id = +args.id.id;
+
+        let collection;
+        try {
+          collection = await client.collection.delete({
+            ...query,
+            where: { id },
+          });
+        } catch (err) {
+          if (
+            err instanceof Prisma.PrismaClientKnownRequestError &&
+            err.code === 'P2025'
+          ) {
+            throw new NotFoundError();
+          } else {
+            throw err;
+          }
+        }
+
+        if (collection.authorId !== currentUserId) {
+          throw new NotFoundError();
+        }
+
+        return collection;
       }),
   }),
 }));

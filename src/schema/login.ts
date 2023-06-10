@@ -2,7 +2,7 @@ import JsonWebToken from 'jsonwebtoken';
 import { schemaBuilder } from '../schema-builder';
 import { prismaClient } from '../api-clients';
 import bcrypt from 'bcrypt';
-import { AuthError } from '../errors';
+import { IncorrectLoginError } from '../errors';
 
 class AuthResult {
   constructor(public accessToken: string) {}
@@ -28,13 +28,13 @@ async function generateAccessToken(
     },
   });
   if (users.length === 0) {
-    throw new AuthError('Incorrect username or password');
+    throw new IncorrectLoginError();
   }
 
   const user = users[0];
   const isPasswordCorrect = await bcrypt.compare(password, user.hashedPassword);
   if (!isPasswordCorrect) {
-    throw new AuthError('Incorrect username or password');
+    throw new IncorrectLoginError();
   }
 
   const jwtPayload = { username, sub: user.id };
@@ -46,7 +46,7 @@ schemaBuilder.mutationField('login', (t) =>
   t.field({
     type: AuthResult,
     errors: {
-      types: [AuthError],
+      types: [IncorrectLoginError],
     },
     args: {
       username: t.arg.string({ required: true }),

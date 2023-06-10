@@ -2,7 +2,7 @@ import { lexicographicSortSchema, printSchema } from 'graphql';
 import { schemaBuilder } from '../schema-builder';
 import { writeFileSync } from 'fs';
 import prettier from 'prettier';
-import './error';
+import './errors';
 import './enums';
 import './scalars';
 import './genre';

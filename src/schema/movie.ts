@@ -4,6 +4,7 @@ import { MovieSortBy } from './enums/movie-sort-by';
 import { SortDirection } from './enums/sort-direction';
 import { Gender, Prisma, UserType } from '@prisma/client';
 import { ReviewSortBy } from './enums/review-sort-by';
+import { NotFoundError } from '../errors';
 
 function calcDateOfBirthFromAge(age: number): Date {
   const today = new Date();
@@ -233,6 +234,7 @@ schemaBuilder.queryFields((t) => ({
         orderBy: getMoviesOrderByQuery(args.sortBy, args.sortDirection),
       }),
   }),
+
   trendingMovies: t.prismaConnection({
     type: 'Movie',
     cursor: 'id',
@@ -247,6 +249,7 @@ schemaBuilder.queryFields((t) => ({
         },
       }),
   }),
+
   justReleasedMovies: t.prismaConnection({
     type: 'Movie',
     cursor: 'id',
@@ -256,6 +259,7 @@ schemaBuilder.queryFields((t) => ({
         orderBy: { releaseDate: 'desc' },
       }),
   }),
+
   movie: t.prismaField({
     type: 'Movie',
     nullable: true,
@@ -274,14 +278,18 @@ schemaBuilder.mutationFields((t) => ({
   markMovieAsViewed: t.prismaField({
     type: 'Movie',
     authScopes: { regularUser: true, criticUser: true },
+    errors: {
+      types: [NotFoundError],
+    },
     args: {
       id: t.arg.globalID({ required: true }),
       isViewed: t.arg.boolean({ required: true }),
     },
-    resolve: async (query, _, args, context) =>
+    resolve: (query, _, args, context) =>
       prismaClient.$transaction(async (client) => {
         // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
         const userId = context.currentUser!.id;
+
         let viewedUsersUpdateQuery;
         if (args.isViewed) {
           viewedUsersUpdateQuery = {
@@ -292,17 +300,31 @@ schemaBuilder.mutationFields((t) => ({
             disconnect: { id: userId },
           };
         }
-        const movie = await client.movie.update({
-          select: {
-            _count: {
-              select: {
-                viewedUsers: true,
+
+        let movie;
+        try {
+          movie = await client.movie.update({
+            select: {
+              _count: {
+                select: {
+                  viewedUsers: true,
+                },
               },
             },
-          },
-          where: { id: +args.id.id },
-          data: { viewedUsers: viewedUsersUpdateQuery },
-        });
+            where: { id: +args.id.id },
+            data: { viewedUsers: viewedUsersUpdateQuery },
+          });
+        } catch (err) {
+          if (
+            err instanceof Prisma.PrismaClientKnownRequestError &&
+            err.code === 'P2016'
+          ) {
+            throw new NotFoundError();
+          } else {
+            throw err;
+          }
+        }
+
         return await client.movie.update({
           ...query,
           where: { id: +args.id.id },

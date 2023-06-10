@@ -1,11 +1,6 @@
 import { prismaClient } from './api-clients';
 import JsonWebToken from 'jsonwebtoken';
-import { NoJwtSecretError } from './errors';
 import { User } from '@prisma/client';
-
-if (!process.env.JWT_SECRET) {
-  throw new NoJwtSecretError();
-}
 
 export async function authenticate(authField?: string): Promise<User | null> {
   if (!authField) {
