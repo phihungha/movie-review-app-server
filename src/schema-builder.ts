@@ -32,12 +32,16 @@ export const schemaBuilder = new SchemaBuilder<{
   };
 }>({
   plugins: [
+    ErrorsPlugin,
+    ValidationPlugin,
     RelayPlugin,
     ScopeAuthPlugin,
-    ErrorsPlugin,
     ValidationPlugin,
     PrismaPlugin,
   ],
+  errorOptions: {
+    defaultTypes: [Error],
+  },
   relayOptions: {
     clientMutationId: 'omit',
     cursorType: 'ID',
@@ -46,9 +50,6 @@ export const schemaBuilder = new SchemaBuilder<{
     criticUser: context.currentUser?.userType === UserType.Critic,
     regularUser: context.currentUser?.userType === UserType.Regular,
   }),
-  errorOptions: {
-    defaultTypes: [Error],
-  },
   prisma: {
     client: prismaClient,
     filterConnectionTotalCount: true,
