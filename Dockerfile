@@ -3,8 +3,8 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma/ ./prisma/
 RUN --mount=type=cache,target=~/.npm npm install
-COPY src/ ./src/
 COPY tsconfig.json ./
+COPY src/ ./src/
 RUN npm run build
 
 FROM node:18
