@@ -3,10 +3,11 @@ import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
-async function createCrewMember(name: string) {
+async function createCrewMember(name: string, avatarUrl?: string) {
   return await prisma.crewMember.create({
     data: {
       name,
+      avatarUrl,
     },
   });
 }
@@ -27,7 +28,8 @@ async function main() {
   const johnRegular = await prisma.user.create({
     data: {
       username: 'john',
-      avatarUrl: 'aws-s3/abcd',
+      avatarUrl:
+        'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/userProfileImages/2.webp',
       email: 'john@gmail.com',
       hashedPassword,
       name: 'John Xina',
@@ -41,7 +43,8 @@ async function main() {
   const janeRegular = await prisma.user.create({
     data: {
       username: 'jane',
-      avatarUrl: 'aws-s3/abcd',
+      avatarUrl:
+        'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/userProfileImages/3.webp',
       email: 'jane@gmail.com',
       hashedPassword,
       name: 'Jane Sauna',
@@ -67,7 +70,8 @@ async function main() {
   const hungRegular = await prisma.user.create({
     data: {
       username: 'hung',
-      avatarUrl: 'aws-s3/abcd',
+      avatarUrl:
+        'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/userProfileImages/4.webp',
       email: 'hung@gmail.com',
       hashedPassword,
       name: 'Hà Phi Hùng',
@@ -95,7 +99,7 @@ async function main() {
     data: {
       username: 'ebert',
       avatarUrl:
-        'https://upload.wikimedia.org/wikipedia/commons/a/af/Roger_Ebert_Crop.jpg',
+        'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/userProfileImages/1.webp',
       email: 'ebert@gmail.com',
       hashedPassword,
       name: 'Roger Ebert',
@@ -144,18 +148,36 @@ async function main() {
   const warnerBrosCorp = await createCompany('Warner Bros. Pictures');
 
   // Create movies
-  const nolanDirector = await createCrewMember('Christopher Nolan');
-  const hoytemaDop = await createCrewMember('Hoyte van Hoytema');
-  const lameEditor = await createCrewMember('Jennifer Lame');
-  const goranssonComposer = await createCrewMember('Ludwig Göransson');
-  const washingtonActor = await createCrewMember('John David Washington');
-  const pattingsonActor = await createCrewMember('Robert Pattinson');
+  const nolanDirector = await createCrewMember(
+    'Christopher Nolan',
+    'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/crewProfileImages/christopher-nolan-1.webp'
+  );
+  const hoytemaDop = await createCrewMember(
+    'Hoyte van Hoytema',
+    'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/crewProfileImages/hoyte-van-hoytema-1.webp'
+  );
+  const lameEditor = await createCrewMember(
+    'Jennifer Lame',
+    'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/crewProfileImages/jennifer-lame-1.webp'
+  );
+  const goranssonComposer = await createCrewMember(
+    'Ludwig Göransson',
+    'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/crewProfileImages/ludwig-goransson-1.webp'
+  );
+  const washingtonActor = await createCrewMember(
+    'John David Washington',
+    'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/crewProfileImages/john-david-washington-1.webp'
+  );
+  const pattingsonActor = await createCrewMember(
+    'Robert Pattinson',
+    'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/crewProfileImages/robert-pattingson-1.webp'
+  );
   const caneActor = await createCrewMember('Michael Caine');
   const tenet = await prisma.movie.create({
     data: {
       title: 'Tenet',
       posterUrl:
-        'https://m.media-amazon.com/images/I/91oMmAPaaeL._AC_SL1500_.jpg',
+        'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/moviePosters/tenet-2020-1.webp',
       releaseDate: new Date(2020, 9, 3),
       runningTime: 9000,
       genres: {
@@ -194,19 +216,37 @@ async function main() {
     },
   });
 
-  const villeneuveDirector = await createCrewMember('Denis Villeneuve');
-  const spaihtsWriter = await createCrewMember('Jon Spaihts');
-  const fraserDop = await createCrewMember('Greig Fraser');
-  const walkerEditor = await createCrewMember('Joe Walker');
-  const zimmerComposer = await createCrewMember('Hans Zimmer');
+  const villeneuveDirector = await createCrewMember(
+    'Denis Villeneuve',
+    'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/crewProfileImages/denis-villeneuve-1.webp'
+  );
+  const spaihtsWriter = await createCrewMember(
+    'Jon Spaihts',
+    'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/crewProfileImages/jon-spaihts-1.webp'
+  );
+  const fraserDop = await createCrewMember(
+    'Greig Fraser',
+    'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/crewProfileImages/greig-fraser-1.webp'
+  );
+  const walkerEditor = await createCrewMember(
+    'Joe Walker',
+    'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/crewProfileImages/joe-walker-1.webp'
+  );
+  const zimmerComposer = await createCrewMember(
+    'Hans Zimmer',
+    'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/crewProfileImages/hans-zimmer-1.webp'
+  );
   const fergusonActor = await createCrewMember('Rebecca Ferguson');
   const zandayaActor = await createCrewMember('Zendaya');
-  const chalametActor = await createCrewMember('Timothée Chalamet');
+  const chalametActor = await createCrewMember(
+    'Timothée Chalamet',
+    'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/crewProfileImages/timothee-chalamet-1.webp'
+  );
   const dune = await prisma.movie.create({
     data: {
       title: 'Dune',
       posterUrl:
-        'https://m.media-amazon.com/images/I/51URKHWYfnL._AC_SL1024_.jpg',
+        'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/moviePosters/dune-2021-1.webp',
       releaseDate: new Date(2021, 10, 22),
       runningTime: 9360,
       genres: {
