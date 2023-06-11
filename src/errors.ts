@@ -37,9 +37,23 @@ export class NoS3BucketError extends ConfigError {
   }
 }
 
-export class NotFoundError extends Error {
+export class DataError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'DataError';
+  }
+}
+
+export class NotFoundError extends DataError {
   constructor(message = 'ID not found') {
     super(message);
     this.name = 'NotFoundError';
+  }
+}
+
+export class AlreadyExistsError extends DataError {
+  constructor(itemName: string, message?: string) {
+    super(message ?? `${itemName} already exists`);
+    this.name = 'AlreadyExistsError';
   }
 }

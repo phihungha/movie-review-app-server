@@ -1,5 +1,5 @@
 import { schemaBuilder } from '../schema-builder';
-import { Gender, UserType } from '@prisma/client';
+import { Gender, Prisma, UserType } from '@prisma/client';
 import { ReviewSortBy } from './enums/review-sort-by';
 import { SortDirection } from './enums/sort-direction';
 import { getReviewsOrderByQuery } from './movie';
@@ -8,6 +8,7 @@ import bcrypt from 'bcrypt';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { userDateOfBirthSchema } from '../validation-schemas';
+import { AlreadyExistsError } from '../errors';
 
 schemaBuilder.prismaNode('User', {
   id: { field: 'id' },
@@ -203,43 +204,73 @@ const RegularUserUpdateInput = schemaBuilder.inputType(
 schemaBuilder.mutationFields((t) => ({
   criticSignUp: t.prismaField({
     type: 'User',
+    errors: {
+      types: [AlreadyExistsError],
+    },
     args: {
       input: t.arg({ type: CriticSignUpInput, required: true }),
     },
-    resolve: async (query, _, args) =>
-      await prismaClient.user.create({
-        ...query,
-        data: {
-          username: args.input.username,
-          name: args.input.name,
-          email: args.input.email,
-          dateOfBirth: args.input.dateOfBirth,
-          gender: args.input.gender,
-          userType: UserType.Critic,
-          hashedPassword: await hashPassword(args.input.password),
-          criticUser: { create: { blogUrl: args.input.blogUrl } },
-        },
-      }),
+    resolve: async (query, _, args) => {
+      try {
+        return await prismaClient.user.create({
+          ...query,
+          data: {
+            username: args.input.username,
+            name: args.input.name,
+            email: args.input.email,
+            dateOfBirth: args.input.dateOfBirth,
+            gender: args.input.gender,
+            userType: UserType.Critic,
+            hashedPassword: await hashPassword(args.input.password),
+            criticUser: { create: { blogUrl: args.input.blogUrl } },
+          },
+        });
+      } catch (err) {
+        if (
+          err instanceof Prisma.PrismaClientKnownRequestError &&
+          err.code === 'P2002'
+        ) {
+          throw new AlreadyExistsError(err.name);
+        } else {
+          throw err;
+        }
+      }
+    },
   }),
   regularSignUp: t.prismaField({
     type: 'User',
+    errors: {
+      types: [AlreadyExistsError],
+    },
     args: {
       input: t.arg({ type: RegularSignUpInput, required: true }),
     },
-    resolve: async (query, _, args) =>
-      await prismaClient.user.create({
-        ...query,
-        data: {
-          username: args.input.username,
-          name: args.input.name,
-          email: args.input.email,
-          dateOfBirth: args.input.dateOfBirth,
-          gender: args.input.gender,
-          userType: UserType.Regular,
-          hashedPassword: await hashPassword(args.input.password),
-          regularUser: { create: {} },
-        },
-      }),
+    resolve: async (query, _, args) => {
+      try {
+        return await prismaClient.user.create({
+          ...query,
+          data: {
+            username: args.input.username,
+            name: args.input.name,
+            email: args.input.email,
+            dateOfBirth: args.input.dateOfBirth,
+            gender: args.input.gender,
+            userType: UserType.Regular,
+            hashedPassword: await hashPassword(args.input.password),
+            regularUser: { create: {} },
+          },
+        });
+      } catch (err) {
+        if (
+          err instanceof Prisma.PrismaClientKnownRequestError &&
+          err.code === 'P2002'
+        ) {
+          throw new AlreadyExistsError(err.meta?.target as string);
+        } else {
+          throw err;
+        }
+      }
+    },
   }),
   updateCriticUser: t.prismaField({
     type: 'User',
@@ -247,24 +278,38 @@ schemaBuilder.mutationFields((t) => ({
     args: {
       input: t.arg({ type: CriticUserUpdateInput, required: true }),
     },
-    resolve: async (query, _, args, context) =>
-      await prismaClient.user.update({
-        ...query,
-        // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
-        where: { id: context.currentUser!.id },
-        data: {
-          username: args.input.username ?? undefined,
-          name: args.input.name ?? undefined,
-          email: args.input.email ?? undefined,
-          avatarUrl: args.input.avatarUrl,
-          dateOfBirth: args.input.dateOfBirth,
-          gender: args.input.gender,
-          hashedPassword: args.input.password
-            ? await hashPassword(args.input.password)
-            : undefined,
-          criticUser: { update: { blogUrl: args.input.blogUrl ?? undefined } },
-        },
-      }),
+    resolve: async (query, _, args, context) => {
+      try {
+        return await prismaClient.user.update({
+          ...query,
+          // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
+          where: { id: context.currentUser!.id },
+          data: {
+            username: args.input.username ?? undefined,
+            name: args.input.name ?? undefined,
+            email: args.input.email ?? undefined,
+            avatarUrl: args.input.avatarUrl,
+            dateOfBirth: args.input.dateOfBirth,
+            gender: args.input.gender,
+            hashedPassword: args.input.password
+              ? await hashPassword(args.input.password)
+              : undefined,
+            criticUser: {
+              update: { blogUrl: args.input.blogUrl ?? undefined },
+            },
+          },
+        });
+      } catch (err) {
+        if (
+          err instanceof Prisma.PrismaClientKnownRequestError &&
+          err.code === 'P2002'
+        ) {
+          throw new AlreadyExistsError(err.meta?.target as string);
+        } else {
+          throw err;
+        }
+      }
+    },
   }),
   updateRegularUser: t.prismaField({
     type: 'User',
@@ -272,22 +317,34 @@ schemaBuilder.mutationFields((t) => ({
     args: {
       input: t.arg({ type: RegularUserUpdateInput, required: true }),
     },
-    resolve: async (query, _, args, context) =>
-      await prismaClient.user.update({
-        ...query,
-        // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
-        where: { id: context.currentUser!.id },
-        data: {
-          username: args.input.username ?? undefined,
-          name: args.input.name ?? undefined,
-          email: args.input.email ?? undefined,
-          avatarUrl: args.input.avatarUrl,
-          dateOfBirth: args.input.dateOfBirth,
-          gender: args.input.gender,
-          hashedPassword: args.input.password
-            ? await hashPassword(args.input.password)
-            : undefined,
-        },
-      }),
+    resolve: async (query, _, args, context) => {
+      try {
+        return await prismaClient.user.update({
+          ...query,
+          // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
+          where: { id: context.currentUser!.id },
+          data: {
+            username: args.input.username ?? undefined,
+            name: args.input.name ?? undefined,
+            email: args.input.email ?? undefined,
+            avatarUrl: args.input.avatarUrl,
+            dateOfBirth: args.input.dateOfBirth,
+            gender: args.input.gender,
+            hashedPassword: args.input.password
+              ? await hashPassword(args.input.password)
+              : undefined,
+          },
+        });
+      } catch (err) {
+        if (
+          err instanceof Prisma.PrismaClientKnownRequestError &&
+          err.code === 'P2002'
+        ) {
+          throw new AlreadyExistsError(err.meta?.target as string);
+        } else {
+          throw err;
+        }
+      }
+    },
   }),
 }));

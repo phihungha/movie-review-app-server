@@ -1,4 +1,9 @@
-import { AuthError, IncorrectLoginError, NotFoundError } from '../errors';
+import {
+  AlreadyExistsError,
+  AuthError,
+  IncorrectLoginError,
+  NotFoundError,
+} from '../errors';
 import { schemaBuilder } from '../schema-builder';
 
 const ErrorInterface = schemaBuilder.interfaceRef<Error>('Error').implement({
@@ -24,5 +29,10 @@ schemaBuilder.objectType(IncorrectLoginError, {
 
 schemaBuilder.objectType(NotFoundError, {
   name: 'NotFoundError',
+  interfaces: [ErrorInterface],
+});
+
+schemaBuilder.objectType(AlreadyExistsError, {
+  name: 'AlreadyExistsError',
   interfaces: [ErrorInterface],
 });

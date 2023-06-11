@@ -5,6 +5,10 @@ type ActingCredit implements Node {
   movie: Movie!
 }
 
+type AlreadyExistsError implements Error {
+  message: String!
+}
+
 type AuthError implements Error {
   message: String!
 }
@@ -396,7 +400,7 @@ type Mutation {
   createCollection(name: String!): Collection!
   createComment(input: CreateCommentInput!): MutationCreateCommentResult!
   createReview(input: CreateReviewInput!): MutationCreateReviewResult!
-  criticSignUp(input: CriticSignUpInput!): User!
+  criticSignUp(input: CriticSignUpInput!): MutationCriticSignUpResult!
   deleteCollection(id: ID!): MutationDeleteCollectionResult!
   deleteComment(id: ID!): MutationDeleteCommentResult!
   deleteReview(id: ID!): MutationDeleteReviewResult!
@@ -408,7 +412,7 @@ type Mutation {
     id: ID!
     isViewed: Boolean!
   ): MutationMarkMovieAsViewedResult!
-  regularSignUp(input: RegularSignUpInput!): User!
+  regularSignUp(input: RegularSignUpInput!): MutationRegularSignUpResult!
   removeFromCollection(
     id: ID!
     movieIds: [ID!]!
@@ -443,6 +447,15 @@ union MutationCreateReviewResult =
 
 type MutationCreateReviewSuccess {
   data: Review!
+}
+
+union MutationCriticSignUpResult =
+    AlreadyExistsError
+  | BaseError
+  | MutationCriticSignUpSuccess
+
+type MutationCriticSignUpSuccess {
+  data: User!
 }
 
 union MutationDeleteCollectionResult =
@@ -515,6 +528,15 @@ union MutationMarkMovieAsViewedResult =
 
 type MutationMarkMovieAsViewedSuccess {
   data: Movie!
+}
+
+union MutationRegularSignUpResult =
+    AlreadyExistsError
+  | BaseError
+  | MutationRegularSignUpSuccess
+
+type MutationRegularSignUpSuccess {
+  data: User!
 }
 
 union MutationRemoveFromCollectionResult =
