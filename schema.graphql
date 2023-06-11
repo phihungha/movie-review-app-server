@@ -258,6 +258,11 @@ interface Error {
   message: String!
 }
 
+type FieldValidationError {
+  message: String!
+  path: [String!]!
+}
+
 enum Gender {
   Female
   Male
@@ -426,7 +431,7 @@ union MutationAddToCollectionResult =
     BaseError
   | MutationAddToCollectionSuccess
   | NotFoundError
-  | ZodError
+  | ValidationError
 
 type MutationAddToCollectionSuccess {
   data: Collection!
@@ -436,7 +441,7 @@ union MutationCreateCommentResult =
     BaseError
   | MutationCreateCommentSuccess
   | NotFoundError
-  | ZodError
+  | ValidationError
 
 type MutationCreateCommentSuccess {
   data: Comment!
@@ -446,7 +451,7 @@ union MutationCreateReviewResult =
     BaseError
   | MutationCreateReviewSuccess
   | NotFoundError
-  | ZodError
+  | ValidationError
 
 type MutationCreateReviewSuccess {
   data: Review!
@@ -456,7 +461,7 @@ union MutationCriticSignUpResult =
     AlreadyExistsError
   | BaseError
   | MutationCriticSignUpSuccess
-  | ZodError
+  | ValidationError
 
 type MutationCriticSignUpSuccess {
   data: User!
@@ -466,7 +471,7 @@ union MutationDeleteCollectionResult =
     BaseError
   | MutationDeleteCollectionSuccess
   | NotFoundError
-  | ZodError
+  | ValidationError
 
 type MutationDeleteCollectionSuccess {
   data: Collection!
@@ -476,7 +481,7 @@ union MutationDeleteCommentResult =
     BaseError
   | MutationDeleteCommentSuccess
   | NotFoundError
-  | ZodError
+  | ValidationError
 
 type MutationDeleteCommentSuccess {
   data: Comment!
@@ -486,7 +491,7 @@ union MutationDeleteReviewResult =
     BaseError
   | MutationDeleteReviewSuccess
   | NotFoundError
-  | ZodError
+  | ValidationError
 
 type MutationDeleteReviewSuccess {
   data: Review!
@@ -496,7 +501,7 @@ union MutationEditCollectionResult =
     BaseError
   | MutationEditCollectionSuccess
   | NotFoundError
-  | ZodError
+  | ValidationError
 
 type MutationEditCollectionSuccess {
   data: Collection!
@@ -506,7 +511,7 @@ union MutationEditCommentResult =
     BaseError
   | MutationEditCommentSuccess
   | NotFoundError
-  | ZodError
+  | ValidationError
 
 type MutationEditCommentSuccess {
   data: Comment!
@@ -516,7 +521,7 @@ union MutationEditReviewResult =
     BaseError
   | MutationEditReviewSuccess
   | NotFoundError
-  | ZodError
+  | ValidationError
 
 type MutationEditReviewSuccess {
   data: Review!
@@ -526,7 +531,7 @@ union MutationLoginResult =
     BaseError
   | IncorrectLoginError
   | MutationLoginSuccess
-  | ZodError
+  | ValidationError
 
 type MutationLoginSuccess {
   data: AuthResult!
@@ -536,7 +541,7 @@ union MutationMarkMovieAsViewedResult =
     BaseError
   | MutationMarkMovieAsViewedSuccess
   | NotFoundError
-  | ZodError
+  | ValidationError
 
 type MutationMarkMovieAsViewedSuccess {
   data: Movie!
@@ -546,7 +551,7 @@ union MutationRegularSignUpResult =
     AlreadyExistsError
   | BaseError
   | MutationRegularSignUpSuccess
-  | ZodError
+  | ValidationError
 
 type MutationRegularSignUpSuccess {
   data: User!
@@ -556,7 +561,7 @@ union MutationRemoveFromCollectionResult =
     BaseError
   | MutationRemoveFromCollectionSuccess
   | NotFoundError
-  | ZodError
+  | ValidationError
 
 type MutationRemoveFromCollectionSuccess {
   data: Collection!
@@ -566,7 +571,7 @@ union MutationThankReviewResult =
     BaseError
   | MutationThankReviewSuccess
   | NotFoundError
-  | ZodError
+  | ValidationError
 
 type MutationThankReviewSuccess {
   data: Review!
@@ -885,12 +890,7 @@ type UserViewedMoviesConnectionEdge {
   node: Movie!
 }
 
-type ZodError implements Error {
-  fieldErrors: [ZodFieldError!]!
+type ValidationError implements Error {
+  fieldErrors: [FieldValidationError!]!
   message: String!
-}
-
-type ZodFieldError {
-  message: String!
-  path: [String!]!
 }

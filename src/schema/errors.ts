@@ -66,7 +66,7 @@ const ZodFieldError = schemaBuilder
   .objectRef<{
     message: string;
     path: string[];
-  }>('ZodFieldError')
+  }>('FieldValidationError')
   .implement({
     fields: (t) => ({
       message: t.exposeString('message'),
@@ -75,7 +75,7 @@ const ZodFieldError = schemaBuilder
   });
 
 schemaBuilder.objectType(ZodError, {
-  name: 'ZodError',
+  name: 'ValidationError',
   interfaces: [ErrorInterface],
   fields: (t) => ({
     fieldErrors: t.field({
