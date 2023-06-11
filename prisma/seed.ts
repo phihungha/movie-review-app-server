@@ -22,7 +22,7 @@ async function createCompany(name: string) {
 
 async function main() {
   const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash('1234', salt);
+  const hashedPassword = await bcrypt.hash('12345678', salt);
 
   // Create users
   const johnRegular = await prisma.user.create({
