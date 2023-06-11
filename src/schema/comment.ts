@@ -3,6 +3,8 @@ import { prismaClient } from '../api-clients';
 import { NotFoundError } from '../errors';
 import { schemaBuilder } from '../schema-builder';
 
+const MIN_COMMENT_LENGTH = 1;
+
 schemaBuilder.prismaNode('Comment', {
   id: { field: 'id' },
   fields: (t) => ({
@@ -24,13 +26,18 @@ schemaBuilder.prismaNode('Comment', {
 const CreateCommentInput = schemaBuilder.inputType('CreateCommentInput', {
   fields: (t) => ({
     reviewId: t.globalID({ required: true }),
-    content: t.string({ required: true }),
+    content: t.string({
+      required: true,
+      validate: { minLength: MIN_COMMENT_LENGTH },
+    }),
   }),
 });
 
 const EditCommentInput = schemaBuilder.inputType('EditCommentInput', {
   fields: (t) => ({
-    content: t.string({ required: true }),
+    content: t.string({
+      validate: { minLength: MIN_COMMENT_LENGTH },
+    }),
   }),
 });
 
@@ -100,7 +107,7 @@ schemaBuilder.mutationFields((t) => ({
           ...query,
           where: { id },
           data: {
-            content: args.input.content,
+            content: args.input.content ?? undefined,
             lastUpdateTime: new Date(),
           },
         });

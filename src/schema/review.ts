@@ -80,18 +80,18 @@ async function updateAggregateData(txClient: PrismaTxClient, review: Review) {
 const CreateReviewInput = schemaBuilder.inputType('CreateReviewInput', {
   fields: (t) => ({
     movieId: t.globalID({ required: true }),
-    title: t.string({ required: true }),
-    content: t.string({ required: true }),
-    score: t.int({ required: true }),
-    externalUrl: t.string(),
+    title: t.string({ required: true, validate: { minLength: 1 } }),
+    content: t.string({ required: true, validate: { minLength: 1 } }),
+    score: t.int({ required: true, validate: { min: 0, max: 10 } }),
+    externalUrl: t.string({ validate: { url: true } }),
   }),
 });
 
 const EditReviewInput = schemaBuilder.inputType('EditReviewInput', {
   fields: (t) => ({
-    title: t.string(),
-    content: t.string(),
-    externalUrl: t.string(),
+    title: t.string({ validate: { minLength: 1 } }),
+    content: t.string({ validate: { minLength: 1 } }),
+    externalUrl: t.string({ validate: { url: true } }),
   }),
 });
 

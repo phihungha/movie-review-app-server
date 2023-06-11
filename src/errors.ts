@@ -38,7 +38,7 @@ export class NoS3BucketError extends ConfigError {
 }
 
 export class NotFoundError extends Error {
-  constructor(message = 'Not found') {
+  constructor(message = 'ID not found') {
     super(message);
     this.name = 'NotFoundError';
   }

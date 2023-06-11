@@ -7,6 +7,7 @@ import { prismaClient, s3Client } from '../api-clients';
 import bcrypt from 'bcrypt';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { userDateOfBirthSchema } from '../validation-schemas';
 
 schemaBuilder.prismaNode('User', {
   id: { field: 'id' },
@@ -138,37 +139,46 @@ async function hashPassword(password: string): Promise<string> {
 
 const CriticSignUpInput = schemaBuilder.inputType('CriticSignUpInput', {
   fields: (t) => ({
-    username: t.string({ required: true }),
-    email: t.string({ required: true }),
-    name: t.string({ required: true }),
-    password: t.string({ required: true }),
-    dateOfBirth: t.field({ type: 'Date' }),
+    username: t.string({ required: true, validate: { minLength: 1 } }),
+    email: t.string({ required: true, validate: { email: true } }),
+    name: t.string({ required: true, validate: { minLength: 1 } }),
+    password: t.string({ required: true, validate: { minLength: 8 } }),
+    dateOfBirth: t.field({
+      type: 'Date',
+      validate: { schema: userDateOfBirthSchema },
+    }),
     gender: t.field({ type: Gender }),
-    blogUrl: t.string({ required: true }),
+    blogUrl: t.string({ required: true, validate: { url: true } }),
   }),
 });
 
 const RegularSignUpInput = schemaBuilder.inputType('RegularSignUpInput', {
   fields: (t) => ({
-    username: t.string({ required: true }),
-    email: t.string({ required: true }),
-    name: t.string({ required: true }),
-    password: t.string({ required: true }),
-    dateOfBirth: t.field({ type: 'Date' }),
+    username: t.string({ required: true, validate: { minLength: 1 } }),
+    email: t.string({ required: true, validate: { email: true } }),
+    name: t.string({ required: true, validate: { minLength: 1 } }),
+    password: t.string({ required: true, validate: { minLength: 8 } }),
+    dateOfBirth: t.field({
+      type: 'Date',
+      validate: { schema: userDateOfBirthSchema },
+    }),
     gender: t.field({ type: Gender }),
   }),
 });
 
 const CriticUserUpdateInput = schemaBuilder.inputType('CriticUserUpdateInput', {
   fields: (t) => ({
-    username: t.string(),
-    email: t.string(),
-    name: t.string(),
-    password: t.string(),
-    avatarUrl: t.string(),
-    dateOfBirth: t.field({ type: 'Date' }),
+    username: t.string({ validate: { minLength: 1 } }),
+    email: t.string({ validate: { email: true } }),
+    name: t.string({ validate: { minLength: 1 } }),
+    password: t.string({ validate: { minLength: 8 } }),
+    avatarUrl: t.string({ validate: { url: true } }),
+    dateOfBirth: t.field({
+      type: 'Date',
+      validate: { schema: userDateOfBirthSchema },
+    }),
     gender: t.field({ type: Gender }),
-    blogUrl: t.string(),
+    blogUrl: t.string({ validate: { url: true } }),
   }),
 });
 
@@ -176,12 +186,15 @@ const RegularUserUpdateInput = schemaBuilder.inputType(
   'RegularUserUpdateInput',
   {
     fields: (t) => ({
-      username: t.string(),
-      email: t.string(),
-      name: t.string(),
-      password: t.string(),
-      avatarUrl: t.string(),
-      dateOfBirth: t.field({ type: 'Date' }),
+      username: t.string({ validate: { minLength: 1 } }),
+      email: t.string({ validate: { email: true } }),
+      name: t.string({ validate: { minLength: 1 } }),
+      password: t.string({ validate: { minLength: 8 } }),
+      avatarUrl: t.string({ validate: { url: true } }),
+      dateOfBirth: t.field({
+        type: 'Date',
+        validate: { schema: userDateOfBirthSchema },
+      }),
       gender: t.field({ type: Gender }),
     }),
   }

@@ -5,12 +5,8 @@ import { SortDirection } from './enums/sort-direction';
 import { Gender, Prisma, UserType } from '@prisma/client';
 import { ReviewSortBy } from './enums/review-sort-by';
 import { NotFoundError } from '../errors';
-
-function calcDateOfBirthFromAge(age: number): Date {
-  const today = new Date();
-  today.setFullYear(today.getFullYear() - age);
-  return today;
-}
+import { calcDateOfBirthFromAge } from '../utils';
+import { reviewScoreSchema } from '../validation-schemas';
 
 export function getReviewsOrderByQuery(
   sortByArgValue: ReviewSortBy | undefined | null,
@@ -57,8 +53,8 @@ schemaBuilder.prismaNode('Movie', {
       cursor: 'id',
       args: {
         textContains: t.arg.string(),
-        minScore: t.arg.int(),
-        maxScore: t.arg.int(),
+        minScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
+        maxScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
         sortBy: t.arg({ type: ReviewSortBy }),
         sortDirection: t.arg({ type: SortDirection }),
       },
@@ -86,8 +82,8 @@ schemaBuilder.prismaNode('Movie', {
       cursor: 'id',
       args: {
         textContains: t.arg.string(),
-        minScore: t.arg.int(),
-        maxScore: t.arg.int(),
+        minScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
+        maxScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
         sortBy: t.arg({ type: ReviewSortBy }),
         sortDirection: t.arg({ type: SortDirection }),
       },
@@ -119,8 +115,8 @@ schemaBuilder.prismaNode('Movie', {
       nullable: true,
       args: {
         gender: t.arg({ type: Gender }),
-        minAge: t.arg.int(),
-        maxAge: t.arg.int(),
+        minAge: t.arg.int({ validate: { min: 0 } }),
+        maxAge: t.arg.int({ validate: { min: 0 } }),
       },
       resolve: async (parent, args) => {
         const result = await prismaClient.review.aggregate({
@@ -148,7 +144,10 @@ schemaBuilder.prismaNode('Movie', {
     }),
     numberOfReviewsPerScore: t.int({
       args: {
-        score: t.arg.int({ required: true }),
+        score: t.arg.int({
+          required: true,
+          validate: { schema: reviewScoreSchema },
+        }),
         authorType: t.arg({ type: UserType, required: true }),
       },
       resolve: (parent, args) =>
@@ -202,10 +201,10 @@ schemaBuilder.queryFields((t) => ({
     args: {
       titleContains: t.arg.string(),
       genres: t.arg.stringList(),
-      minRegularScore: t.arg.int(),
-      maxRegularScore: t.arg.int(),
-      minCriticScore: t.arg.int(),
-      maxCriticScore: t.arg.int(),
+      minRegularScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
+      maxRegularScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
+      minCriticScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
+      maxCriticScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
       sortBy: t.arg({ type: MovieSortBy }),
       sortDirection: t.arg({ type: SortDirection }),
     },

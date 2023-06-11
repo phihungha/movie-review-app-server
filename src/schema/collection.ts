@@ -5,6 +5,8 @@ import { CollectionSortBy } from './enums/collection-sort-by';
 import { SortDirection } from './enums/sort-direction';
 import { NotFoundError } from '../errors';
 
+const MIN_COLLECTION_NAME_LENGTH = 1;
+
 export function getCollectionsOrderByQuery(
   sortByArgValue: CollectionSortBy | undefined | null,
   sortDirection: SortDirection | undefined | null
@@ -81,7 +83,10 @@ schemaBuilder.mutationFields((t) => ({
     type: 'Collection',
     authScopes: { regularUser: true, criticUser: true },
     args: {
-      name: t.arg.string({ required: true }),
+      name: t.arg.string({
+        required: true,
+        validate: { minLength: MIN_COLLECTION_NAME_LENGTH },
+      }),
     },
     resolve: (query, _, args, context) =>
       prismaClient.collection.create({
@@ -102,7 +107,10 @@ schemaBuilder.mutationFields((t) => ({
     },
     args: {
       id: t.arg.globalID({ required: true }),
-      name: t.arg.string({ required: true }),
+      name: t.arg.string({
+        required: true,
+        validate: { minLength: MIN_COLLECTION_NAME_LENGTH },
+      }),
     },
     resolve: (query, _, args, context) =>
       prismaClient.$transaction(async (client) => {
