@@ -8,6 +8,7 @@ import type PrismaTypes from '@pothos/plugin-prisma/generated';
 import { Context } from './types';
 import { prismaClient } from './api-clients';
 import { UserType } from '@prisma/client';
+import { ZodError } from 'zod';
 
 export const schemaBuilder = new SchemaBuilder<{
   Context: Context;
@@ -40,7 +41,7 @@ export const schemaBuilder = new SchemaBuilder<{
     PrismaPlugin,
   ],
   errorOptions: {
-    defaultTypes: [Error],
+    defaultTypes: [Error, ZodError],
   },
   relayOptions: {
     clientMutationId: 'omit',

@@ -426,6 +426,7 @@ union MutationAddToCollectionResult =
     BaseError
   | MutationAddToCollectionSuccess
   | NotFoundError
+  | ZodError
 
 type MutationAddToCollectionSuccess {
   data: Collection!
@@ -435,6 +436,7 @@ union MutationCreateCommentResult =
     BaseError
   | MutationCreateCommentSuccess
   | NotFoundError
+  | ZodError
 
 type MutationCreateCommentSuccess {
   data: Comment!
@@ -444,6 +446,7 @@ union MutationCreateReviewResult =
     BaseError
   | MutationCreateReviewSuccess
   | NotFoundError
+  | ZodError
 
 type MutationCreateReviewSuccess {
   data: Review!
@@ -453,6 +456,7 @@ union MutationCriticSignUpResult =
     AlreadyExistsError
   | BaseError
   | MutationCriticSignUpSuccess
+  | ZodError
 
 type MutationCriticSignUpSuccess {
   data: User!
@@ -462,6 +466,7 @@ union MutationDeleteCollectionResult =
     BaseError
   | MutationDeleteCollectionSuccess
   | NotFoundError
+  | ZodError
 
 type MutationDeleteCollectionSuccess {
   data: Collection!
@@ -471,6 +476,7 @@ union MutationDeleteCommentResult =
     BaseError
   | MutationDeleteCommentSuccess
   | NotFoundError
+  | ZodError
 
 type MutationDeleteCommentSuccess {
   data: Comment!
@@ -480,6 +486,7 @@ union MutationDeleteReviewResult =
     BaseError
   | MutationDeleteReviewSuccess
   | NotFoundError
+  | ZodError
 
 type MutationDeleteReviewSuccess {
   data: Review!
@@ -489,6 +496,7 @@ union MutationEditCollectionResult =
     BaseError
   | MutationEditCollectionSuccess
   | NotFoundError
+  | ZodError
 
 type MutationEditCollectionSuccess {
   data: Collection!
@@ -498,6 +506,7 @@ union MutationEditCommentResult =
     BaseError
   | MutationEditCommentSuccess
   | NotFoundError
+  | ZodError
 
 type MutationEditCommentSuccess {
   data: Comment!
@@ -507,6 +516,7 @@ union MutationEditReviewResult =
     BaseError
   | MutationEditReviewSuccess
   | NotFoundError
+  | ZodError
 
 type MutationEditReviewSuccess {
   data: Review!
@@ -516,6 +526,7 @@ union MutationLoginResult =
     BaseError
   | IncorrectLoginError
   | MutationLoginSuccess
+  | ZodError
 
 type MutationLoginSuccess {
   data: AuthResult!
@@ -525,6 +536,7 @@ union MutationMarkMovieAsViewedResult =
     BaseError
   | MutationMarkMovieAsViewedSuccess
   | NotFoundError
+  | ZodError
 
 type MutationMarkMovieAsViewedSuccess {
   data: Movie!
@@ -534,6 +546,7 @@ union MutationRegularSignUpResult =
     AlreadyExistsError
   | BaseError
   | MutationRegularSignUpSuccess
+  | ZodError
 
 type MutationRegularSignUpSuccess {
   data: User!
@@ -543,6 +556,7 @@ union MutationRemoveFromCollectionResult =
     BaseError
   | MutationRemoveFromCollectionSuccess
   | NotFoundError
+  | ZodError
 
 type MutationRemoveFromCollectionSuccess {
   data: Collection!
@@ -552,6 +566,7 @@ union MutationThankReviewResult =
     BaseError
   | MutationThankReviewSuccess
   | NotFoundError
+  | ZodError
 
 type MutationThankReviewSuccess {
   data: Review!
@@ -868,4 +883,14 @@ type UserViewedMoviesConnection {
 type UserViewedMoviesConnectionEdge {
   cursor: ID!
   node: Movie!
+}
+
+type ZodError implements Error {
+  fieldErrors: [ZodFieldError!]!
+  message: String!
+}
+
+type ZodFieldError {
+  message: String!
+  path: [String!]!
 }
