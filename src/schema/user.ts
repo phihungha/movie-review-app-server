@@ -230,7 +230,7 @@ schemaBuilder.mutationFields((t) => ({
           err instanceof Prisma.PrismaClientKnownRequestError &&
           err.code === 'P2002'
         ) {
-          throw new AlreadyExistsError(err.name);
+          throw new AlreadyExistsError(err.meta?.target as string);
         } else {
           throw err;
         }
