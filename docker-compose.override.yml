@@ -6,7 +6,7 @@ services:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@cinerate-app-db:5432/${POSTGRES_DB:-app}?schema=public
       - JWT_SECRET=${JWT_SECRET:-By6nEuzserO3Zu2vsKbd}
       - AWS_PROFILE=${AWS_PROFILE}
-      - S3_BUCKET=cinerate-movie-review
+      - S3_BUCKET=cinerate-movie-review-service
     volumes:
       - .:/app
       - ${HOME}/.aws:/root/.aws:ro
