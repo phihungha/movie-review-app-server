@@ -1,23 +1,37 @@
+import { DecodedIdToken, getAuth } from 'firebase-admin/auth';
 import { prismaClient } from './api-clients';
-import JsonWebToken from 'jsonwebtoken';
 import { User } from '@prisma/client';
 
-export async function authenticate(authField?: string): Promise<User | null> {
-  if (!authField) {
+async function getDecodedIdToken(
+  idToken: string
+): Promise<DecodedIdToken | null> {
+  try {
+    return await getAuth().verifyIdToken(idToken);
+  } catch (err) {
+    console.log(err);
     return null;
+  }
+}
+
+export async function authenticate(authField?: string) {
+  let decodedIdToken: DecodedIdToken | null = null;
+  let currentUser: User | null = null;
+
+  if (!authField) {
+    return { decodedIdToken, currentUser };
   }
   const authFieldParts = authField.split('Bearer ');
-  const accessToken = authFieldParts.at(1);
-  if (!accessToken) {
-    return null;
+
+  const idToken = authFieldParts.at(1);
+  if (idToken) {
+    decodedIdToken = await getDecodedIdToken(idToken);
+
+    if (decodedIdToken) {
+      currentUser = await prismaClient.user.findUnique({
+        where: { id: decodedIdToken.uid },
+      });
+    }
   }
 
-  // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
-  const payload = JsonWebToken.verify(accessToken, process.env.JWT_SECRET!);
-  if (!payload.sub) {
-    return null;
-  }
-  const userId = +payload.sub;
-
-  return await prismaClient.user.findFirst({ where: { id: userId } });
+  return { decodedIdToken, currentUser };
 }

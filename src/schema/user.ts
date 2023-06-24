@@ -4,11 +4,15 @@ import { ReviewSortBy } from './enums/review-sort-by';
 import { SortDirection } from './enums/sort-direction';
 import { getReviewsOrderByQuery } from './movie';
 import { prismaClient, s3Client } from '../api-clients';
-import bcrypt from 'bcrypt';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { userDateOfBirthSchema } from '../validation-schemas';
 import { AlreadyExistsError } from '../errors';
+import { getAuth } from 'firebase-admin/auth';
+
+async function getFirebaseUser(uid: string) {
+  return await getAuth().getUser(uid);
+}
 
 schemaBuilder.prismaNode('User', {
   id: { field: 'id' },
@@ -107,7 +111,7 @@ schemaBuilder.queryFields((t) => ({
     resolve: (query, _, args) =>
       prismaClient.user.findUnique({
         ...query,
-        where: { id: +args.id.id },
+        where: { id: args.id.id },
       }),
   }),
   viewer: t.prismaField({
@@ -133,17 +137,9 @@ schemaBuilder.queryFields((t) => ({
   }),
 }));
 
-async function hashPassword(password: string): Promise<string> {
-  const salt = await bcrypt.genSalt(12);
-  return await bcrypt.hash(password, salt);
-}
-
 const CriticSignUpInput = schemaBuilder.inputType('CriticSignUpInput', {
   fields: (t) => ({
     username: t.string({ required: true, validate: { minLength: 1 } }),
-    email: t.string({ required: true, validate: { email: true } }),
-    name: t.string({ required: true, validate: { minLength: 1 } }),
-    password: t.string({ required: true, validate: { minLength: 8 } }),
     dateOfBirth: t.field({
       type: 'Date',
       validate: { schema: userDateOfBirthSchema },
@@ -156,9 +152,6 @@ const CriticSignUpInput = schemaBuilder.inputType('CriticSignUpInput', {
 const RegularSignUpInput = schemaBuilder.inputType('RegularSignUpInput', {
   fields: (t) => ({
     username: t.string({ required: true, validate: { minLength: 1 } }),
-    email: t.string({ required: true, validate: { email: true } }),
-    name: t.string({ required: true, validate: { minLength: 1 } }),
-    password: t.string({ required: true, validate: { minLength: 8 } }),
     dateOfBirth: t.field({
       type: 'Date',
       validate: { schema: userDateOfBirthSchema },
@@ -170,9 +163,6 @@ const RegularSignUpInput = schemaBuilder.inputType('RegularSignUpInput', {
 const CriticUserUpdateInput = schemaBuilder.inputType('CriticUserUpdateInput', {
   fields: (t) => ({
     username: t.string({ validate: { minLength: 1 } }),
-    email: t.string({ validate: { email: true } }),
-    name: t.string({ validate: { minLength: 1 } }),
-    password: t.string({ validate: { minLength: 8 } }),
     avatarUrl: t.string({ validate: { url: true } }),
     dateOfBirth: t.field({
       type: 'Date',
@@ -188,9 +178,6 @@ const RegularUserUpdateInput = schemaBuilder.inputType(
   {
     fields: (t) => ({
       username: t.string({ validate: { minLength: 1 } }),
-      email: t.string({ validate: { email: true } }),
-      name: t.string({ validate: { minLength: 1 } }),
-      password: t.string({ validate: { minLength: 8 } }),
       avatarUrl: t.string({ validate: { url: true } }),
       dateOfBirth: t.field({
         type: 'Date',
@@ -204,24 +191,32 @@ const RegularUserUpdateInput = schemaBuilder.inputType(
 schemaBuilder.mutationFields((t) => ({
   criticSignUp: t.prismaField({
     type: 'User',
+    authScopes: { newUser: true },
     errors: {
       types: [AlreadyExistsError],
     },
     args: {
       input: t.arg({ type: CriticSignUpInput, required: true }),
     },
-    resolve: async (query, _, args) => {
+    resolve: async (query, _, args, context) => {
+      // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
+      const firebaseUser = await getFirebaseUser(context.decodedIdToken!.uid);
+      if (!firebaseUser.displayName || !firebaseUser.email) {
+        throw new Error(
+          'Firebase user does not have display name or/and email'
+        );
+      }
       try {
         return await prismaClient.user.create({
           ...query,
           data: {
+            id: firebaseUser.uid,
             username: args.input.username,
-            name: args.input.name,
-            email: args.input.email,
+            name: firebaseUser.displayName,
+            email: firebaseUser.email,
             dateOfBirth: args.input.dateOfBirth,
             gender: args.input.gender,
             userType: UserType.Critic,
-            hashedPassword: await hashPassword(args.input.password),
             criticUser: { create: { blogUrl: args.input.blogUrl } },
           },
         });
@@ -245,18 +240,25 @@ schemaBuilder.mutationFields((t) => ({
     args: {
       input: t.arg({ type: RegularSignUpInput, required: true }),
     },
-    resolve: async (query, _, args) => {
+    resolve: async (query, _, args, context) => {
+      // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
+      const firebaseUser = await getFirebaseUser(context.decodedIdToken!.uid);
+      if (!firebaseUser.displayName || !firebaseUser.email) {
+        throw new Error(
+          'Firebase user does not have display name or/and email'
+        );
+      }
       try {
         return await prismaClient.user.create({
           ...query,
           data: {
+            id: firebaseUser.uid,
             username: args.input.username,
-            name: args.input.name,
-            email: args.input.email,
+            name: firebaseUser.displayName,
+            email: firebaseUser.email,
             dateOfBirth: args.input.dateOfBirth,
             gender: args.input.gender,
             userType: UserType.Regular,
-            hashedPassword: await hashPassword(args.input.password),
             regularUser: { create: {} },
           },
         });
@@ -279,6 +281,13 @@ schemaBuilder.mutationFields((t) => ({
       input: t.arg({ type: CriticUserUpdateInput, required: true }),
     },
     resolve: async (query, _, args, context) => {
+      // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
+      const firebaseUser = await getFirebaseUser(context.decodedIdToken!.uid);
+      if (!firebaseUser.displayName || !firebaseUser.email) {
+        throw new Error(
+          'Firebase user does not have display name or/and email'
+        );
+      }
       try {
         return await prismaClient.user.update({
           ...query,
@@ -286,14 +295,11 @@ schemaBuilder.mutationFields((t) => ({
           where: { id: context.currentUser!.id },
           data: {
             username: args.input.username ?? undefined,
-            name: args.input.name ?? undefined,
-            email: args.input.email ?? undefined,
+            name: firebaseUser.displayName ?? undefined,
+            email: firebaseUser.email ?? undefined,
             avatarUrl: args.input.avatarUrl,
             dateOfBirth: args.input.dateOfBirth,
             gender: args.input.gender,
-            hashedPassword: args.input.password
-              ? await hashPassword(args.input.password)
-              : undefined,
             criticUser: {
               update: { blogUrl: args.input.blogUrl ?? undefined },
             },
@@ -318,6 +324,13 @@ schemaBuilder.mutationFields((t) => ({
       input: t.arg({ type: RegularUserUpdateInput, required: true }),
     },
     resolve: async (query, _, args, context) => {
+      // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
+      const firebaseUser = await getFirebaseUser(context.decodedIdToken!.uid);
+      if (!firebaseUser.displayName || !firebaseUser.email) {
+        throw new Error(
+          'Firebase user does not have display name or/and email'
+        );
+      }
       try {
         return await prismaClient.user.update({
           ...query,
@@ -325,14 +338,11 @@ schemaBuilder.mutationFields((t) => ({
           where: { id: context.currentUser!.id },
           data: {
             username: args.input.username ?? undefined,
-            name: args.input.name ?? undefined,
-            email: args.input.email ?? undefined,
+            name: firebaseUser.displayName ?? undefined,
+            email: firebaseUser.email ?? undefined,
             avatarUrl: args.input.avatarUrl,
             dateOfBirth: args.input.dateOfBirth,
             gender: args.input.gender,
-            hashedPassword: args.input.password
-              ? await hashPassword(args.input.password)
-              : undefined,
           },
         });
       } catch (err) {

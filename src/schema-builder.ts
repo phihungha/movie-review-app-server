@@ -30,6 +30,7 @@ export const schemaBuilder = new SchemaBuilder<{
   AuthScopes: {
     regularUser: boolean;
     criticUser: boolean;
+    newUser: boolean;
   };
 }>({
   plugins: [
@@ -50,6 +51,7 @@ export const schemaBuilder = new SchemaBuilder<{
   authScopes: (context) => ({
     criticUser: context.currentUser?.userType === UserType.Critic,
     regularUser: context.currentUser?.userType === UserType.Regular,
+    newUser: context.decodedIdToken !== null && context.currentUser === null,
   }),
   prisma: {
     client: prismaClient,
