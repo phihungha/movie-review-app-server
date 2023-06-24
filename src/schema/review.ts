@@ -2,7 +2,7 @@ import { Prisma, Review, UserType } from '@prisma/client';
 import { schemaBuilder } from '../schema-builder';
 import { prismaClient } from '../api-clients';
 import { PrismaTxClient } from '../types';
-import { NotFoundError } from '../errors';
+import { AlreadyExistsError, NotFoundError } from '../errors';
 
 schemaBuilder.prismaNode('Review', {
   id: { field: 'id' },
@@ -90,6 +90,7 @@ const CreateReviewInput = schemaBuilder.inputType('CreateReviewInput', {
 const EditReviewInput = schemaBuilder.inputType('EditReviewInput', {
   fields: (t) => ({
     title: t.string({ validate: { minLength: 1 } }),
+    score: t.int({ validate: { min: 0, max: 10 } }),
     content: t.string({ validate: { minLength: 1 } }),
     externalUrl: t.string({ validate: { url: true } }),
   }),
@@ -100,7 +101,7 @@ schemaBuilder.mutationFields((t) => ({
     type: 'Review',
     authScopes: { regularUser: true, criticUser: true },
     errors: {
-      types: [NotFoundError],
+      types: [NotFoundError, AlreadyExistsError],
     },
     args: {
       input: t.arg({ type: CreateReviewInput, required: true }),
@@ -109,6 +110,16 @@ schemaBuilder.mutationFields((t) => ({
       prismaClient.$transaction(async (client) => {
         // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
         const currentUser = context.currentUser!;
+
+        const existingReviews = await client.review.findMany({
+          where: { authorId: currentUser.id, movieId: +args.input.movieId.id },
+        });
+        if (existingReviews.length !== 0) {
+          throw new AlreadyExistsError(
+            'Review',
+            "You've already made a review for this movie. Please edit it instead of making a new one"
+          );
+        }
 
         let review;
         try {
@@ -164,6 +175,7 @@ schemaBuilder.mutationFields((t) => ({
             data: {
               title: args.input.title ?? undefined,
               content: args.input.content ?? undefined,
+              score: args.input.score ?? undefined,
               externalUrl: args.input.externalUrl,
               lastUpdateTime: new Date(),
             },
@@ -182,6 +194,8 @@ schemaBuilder.mutationFields((t) => ({
         if (review.authorId !== currentUserId) {
           throw new NotFoundError();
         }
+
+        await updateAggregateData(client, review);
 
         return review;
       }),

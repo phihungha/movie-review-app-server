@@ -13,6 +13,7 @@
     "lint": "eslint --fix --cache .",
     "ci-lint": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "get-id-token": "ts-node tools/get-id-token.ts",
     "prepare": "husky install",
     "migrate:dev": "prisma migrate dev",
     "migrate:reset": "prisma migrate reset",

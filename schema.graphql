@@ -241,6 +241,7 @@ input EditCommentInput {
 input EditReviewInput {
   content: String
   externalUrl: String
+  score: Int
   title: String
 }
 
@@ -435,7 +436,8 @@ type MutationCreateCommentSuccess {
 }
 
 union MutationCreateReviewResult =
-    AuthError
+    AlreadyExistsError
+  | AuthError
   | BaseError
   | MutationCreateReviewSuccess
   | NotFoundError
