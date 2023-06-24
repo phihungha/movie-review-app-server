@@ -1,10 +1,5 @@
 import { ZodError, ZodFormattedError } from 'zod';
-import {
-  AlreadyExistsError,
-  AuthError,
-  IncorrectLoginError,
-  NotFoundError,
-} from '../errors';
+import { AlreadyExistsError, AuthError, NotFoundError } from '../errors';
 import { schemaBuilder } from '../schema-builder';
 
 const ErrorInterface = schemaBuilder.interfaceRef<Error>('Error').implement({
@@ -20,11 +15,6 @@ schemaBuilder.objectType(Error, {
 
 schemaBuilder.objectType(AuthError, {
   name: 'AuthError',
-  interfaces: [ErrorInterface],
-});
-
-schemaBuilder.objectType(IncorrectLoginError, {
-  name: 'IncorrectLoginError',
   interfaces: [ErrorInterface],
 });
 

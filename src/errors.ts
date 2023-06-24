@@ -5,26 +5,10 @@ export class AuthError extends Error {
   }
 }
 
-export class IncorrectLoginError extends AuthError {
-  constructor(message = 'Incorrect username or password') {
-    super(message);
-    this.name = 'IncorrectLoginError';
-  }
-}
-
 export class ConfigError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'ConfigError';
-  }
-}
-
-export class NoJwtSecretError extends ConfigError {
-  constructor(
-    message = 'JWT_SECRET environment variable must be configured for auth usage'
-  ) {
-    super(message);
-    this.name = 'NoJwtSecretError';
   }
 }
 

@@ -9,6 +9,7 @@ import { Context } from './types';
 import { prismaClient } from './api-clients';
 import { UserType } from '@prisma/client';
 import { ZodError } from 'zod';
+import { AuthError } from './errors';
 
 export const schemaBuilder = new SchemaBuilder<{
   Context: Context;
@@ -35,14 +36,13 @@ export const schemaBuilder = new SchemaBuilder<{
 }>({
   plugins: [
     ErrorsPlugin,
-    ValidationPlugin,
     RelayPlugin,
     ScopeAuthPlugin,
     ValidationPlugin,
     PrismaPlugin,
   ],
   errorOptions: {
-    defaultTypes: [Error, ZodError],
+    defaultTypes: [Error, AuthError, ZodError],
   },
   relayOptions: {
     clientMutationId: 'omit',
@@ -53,6 +53,14 @@ export const schemaBuilder = new SchemaBuilder<{
     regularUser: context.currentUser?.userType === UserType.Regular,
     newUser: context.decodedIdToken !== null && context.currentUser === null,
   }),
+  scopeAuthOptions: {
+    unauthorizedError: (_, context) => {
+      if (context.decodedIdToken !== null && context.currentUser === null) {
+        return new AuthError('User needs to update personal info');
+      }
+      return new AuthError('Not authorized');
+    },
+  },
   prisma: {
     client: prismaClient,
     filterConnectionTotalCount: true,

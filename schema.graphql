@@ -13,10 +13,6 @@ type AuthError implements Error {
   message: String!
 }
 
-type AuthResult {
-  accessToken: Jwt!
-}
-
 type BaseError implements Error {
   message: String!
 }
@@ -216,10 +212,7 @@ type CrewMemberWrittenMoviesConnectionEdge {
 input CriticSignUpInput {
   blogUrl: String!
   dateOfBirth: Date
-  email: String!
   gender: Gender
-  name: String!
-  password: String!
   username: String!
 }
 
@@ -227,10 +220,7 @@ input CriticUserUpdateInput {
   avatarUrl: String
   blogUrl: String
   dateOfBirth: Date
-  email: String
   gender: Gender
-  name: String
-  password: String
   username: String
 }
 
@@ -283,10 +273,6 @@ type GenreMoviesConnection {
 type GenreMoviesConnectionEdge {
   cursor: ID!
   node: Movie!
-}
-
-type IncorrectLoginError implements Error {
-  message: String!
 }
 
 """
@@ -412,7 +398,6 @@ type Mutation {
   editCollection(id: ID!, name: String!): MutationEditCollectionResult!
   editComment(id: ID!, input: EditCommentInput!): MutationEditCommentResult!
   editReview(id: ID!, input: EditReviewInput!): MutationEditReviewResult!
-  login(password: String!, username: String!): MutationLoginResult!
   markMovieAsViewed(
     id: ID!
     isViewed: Boolean!
@@ -428,7 +413,8 @@ type Mutation {
 }
 
 union MutationAddToCollectionResult =
-    BaseError
+    AuthError
+  | BaseError
   | MutationAddToCollectionSuccess
   | NotFoundError
   | ValidationError
@@ -438,7 +424,8 @@ type MutationAddToCollectionSuccess {
 }
 
 union MutationCreateCommentResult =
-    BaseError
+    AuthError
+  | BaseError
   | MutationCreateCommentSuccess
   | NotFoundError
   | ValidationError
@@ -448,7 +435,8 @@ type MutationCreateCommentSuccess {
 }
 
 union MutationCreateReviewResult =
-    BaseError
+    AuthError
+  | BaseError
   | MutationCreateReviewSuccess
   | NotFoundError
   | ValidationError
@@ -459,6 +447,7 @@ type MutationCreateReviewSuccess {
 
 union MutationCriticSignUpResult =
     AlreadyExistsError
+  | AuthError
   | BaseError
   | MutationCriticSignUpSuccess
   | ValidationError
@@ -468,7 +457,8 @@ type MutationCriticSignUpSuccess {
 }
 
 union MutationDeleteCollectionResult =
-    BaseError
+    AuthError
+  | BaseError
   | MutationDeleteCollectionSuccess
   | NotFoundError
   | ValidationError
@@ -478,7 +468,8 @@ type MutationDeleteCollectionSuccess {
 }
 
 union MutationDeleteCommentResult =
-    BaseError
+    AuthError
+  | BaseError
   | MutationDeleteCommentSuccess
   | NotFoundError
   | ValidationError
@@ -488,7 +479,8 @@ type MutationDeleteCommentSuccess {
 }
 
 union MutationDeleteReviewResult =
-    BaseError
+    AuthError
+  | BaseError
   | MutationDeleteReviewSuccess
   | NotFoundError
   | ValidationError
@@ -498,7 +490,8 @@ type MutationDeleteReviewSuccess {
 }
 
 union MutationEditCollectionResult =
-    BaseError
+    AuthError
+  | BaseError
   | MutationEditCollectionSuccess
   | NotFoundError
   | ValidationError
@@ -508,7 +501,8 @@ type MutationEditCollectionSuccess {
 }
 
 union MutationEditCommentResult =
-    BaseError
+    AuthError
+  | BaseError
   | MutationEditCommentSuccess
   | NotFoundError
   | ValidationError
@@ -518,7 +512,8 @@ type MutationEditCommentSuccess {
 }
 
 union MutationEditReviewResult =
-    BaseError
+    AuthError
+  | BaseError
   | MutationEditReviewSuccess
   | NotFoundError
   | ValidationError
@@ -527,18 +522,9 @@ type MutationEditReviewSuccess {
   data: Review!
 }
 
-union MutationLoginResult =
-    BaseError
-  | IncorrectLoginError
-  | MutationLoginSuccess
-  | ValidationError
-
-type MutationLoginSuccess {
-  data: AuthResult!
-}
-
 union MutationMarkMovieAsViewedResult =
-    BaseError
+    AuthError
+  | BaseError
   | MutationMarkMovieAsViewedSuccess
   | NotFoundError
   | ValidationError
@@ -549,6 +535,7 @@ type MutationMarkMovieAsViewedSuccess {
 
 union MutationRegularSignUpResult =
     AlreadyExistsError
+  | AuthError
   | BaseError
   | MutationRegularSignUpSuccess
   | ValidationError
@@ -558,7 +545,8 @@ type MutationRegularSignUpSuccess {
 }
 
 union MutationRemoveFromCollectionResult =
-    BaseError
+    AuthError
+  | BaseError
   | MutationRemoveFromCollectionSuccess
   | NotFoundError
   | ValidationError
@@ -568,7 +556,8 @@ type MutationRemoveFromCollectionSuccess {
 }
 
 union MutationThankReviewResult =
-    BaseError
+    AuthError
+  | BaseError
   | MutationThankReviewSuccess
   | NotFoundError
   | ValidationError
@@ -697,20 +686,14 @@ type QueryUsersConnectionEdge {
 
 input RegularSignUpInput {
   dateOfBirth: Date
-  email: String!
   gender: Gender
-  name: String!
-  password: String!
   username: String!
 }
 
 input RegularUserUpdateInput {
   avatarUrl: String
   dateOfBirth: Date
-  email: String
   gender: Gender
-  name: String
-  password: String
   username: String
 }
 

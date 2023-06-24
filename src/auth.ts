@@ -8,7 +8,6 @@ async function getDecodedIdToken(
   try {
     return await getAuth().verifyIdToken(idToken);
   } catch (err) {
-    console.log(err);
     return null;
   }
 }
