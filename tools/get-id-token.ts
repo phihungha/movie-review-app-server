@@ -29,6 +29,8 @@ async function main() {
   const password = await readlineService.question('Password: ');
   const idToken = await signIn(email, password);
   console.log('ID Token: ', idToken);
+  const decodedIdToken = await authService.currentUser?.getIdTokenResult();
+  console.log('Claims: ', decodedIdToken?.claims);
 }
 
 main().then(() => process.exit());

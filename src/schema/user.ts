@@ -207,7 +207,7 @@ schemaBuilder.mutationFields((t) => ({
         );
       }
       try {
-        return await prismaClient.user.create({
+        const user = await prismaClient.user.create({
           ...query,
           data: {
             id: firebaseUser.uid,
@@ -220,6 +220,11 @@ schemaBuilder.mutationFields((t) => ({
             criticUser: { create: { blogUrl: args.input.blogUrl } },
           },
         });
+        await getAuth().setCustomUserClaims(firebaseUser.uid, {
+          fullAccess: true,
+          role: UserType.Critic,
+        });
+        return user;
       } catch (err) {
         if (
           err instanceof Prisma.PrismaClientKnownRequestError &&
@@ -249,7 +254,7 @@ schemaBuilder.mutationFields((t) => ({
         );
       }
       try {
-        return await prismaClient.user.create({
+        const user = await prismaClient.user.create({
           ...query,
           data: {
             id: firebaseUser.uid,
@@ -262,6 +267,11 @@ schemaBuilder.mutationFields((t) => ({
             regularUser: { create: {} },
           },
         });
+        await getAuth().setCustomUserClaims(firebaseUser.uid, {
+          fullAccess: true,
+          role: UserType.Regular,
+        });
+        return user;
       } catch (err) {
         if (
           err instanceof Prisma.PrismaClientKnownRequestError &&
