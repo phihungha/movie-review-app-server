@@ -7,6 +7,7 @@ services:
       - .env
     volumes:
       - ${HOME}/.aws:/root/.aws:ro
+      - ${HOME}/.creds:/root/.creds:ro
     command: npm start
 
   cinerate-app-db:

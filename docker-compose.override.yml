@@ -4,14 +4,17 @@ services:
       target: build
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-app}@cinerate-app-db:5432/${POSTGRES_DB:-app}?schema=public
-      - JWT_SECRET=${JWT_SECRET:-By6nEuzserO3Zu2vsKbd}
       - AWS_PROFILE=${AWS_PROFILE}
       - S3_BUCKET=cinerate-movie-review-service
+      - GOOGLE_APPLICATION_CREDENTIALS=/root/.creds/cinerate-firebase-adminsdk.json
+    ports:
+      - 9229:9229
     volumes:
       - .:/app
       - ${HOME}/.aws:/root/.aws:ro
+      - ${HOME}/.creds:/root/.creds:ro
       - /app/node_modules
-    command: npm run dev
+    command: npm run debug
 
   cinerate-app-db:
     environment:
