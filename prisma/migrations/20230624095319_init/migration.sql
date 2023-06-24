@@ -6,11 +6,10 @@ CREATE TYPE "Gender" AS ENUM ('Male', 'Female', 'Other');
 
 -- CreateTable
 CREATE TABLE "User" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "username" TEXT NOT NULL,
     "avatarUrl" TEXT,
     "email" TEXT NOT NULL,
-    "hashedPassword" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "userType" "UserType" NOT NULL,
     "gender" "Gender",
@@ -21,14 +20,14 @@ CREATE TABLE "User" (
 
 -- CreateTable
 CREATE TABLE "RegularUser" (
-    "id" INTEGER NOT NULL,
+    "id" TEXT NOT NULL,
 
     CONSTRAINT "RegularUser_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "CriticUser" (
-    "id" INTEGER NOT NULL,
+    "id" TEXT NOT NULL,
     "blogUrl" TEXT NOT NULL,
 
     CONSTRAINT "CriticUser_pkey" PRIMARY KEY ("id")
@@ -87,7 +86,7 @@ CREATE TABLE "Movie" (
 -- CreateTable
 CREATE TABLE "Review" (
     "id" SERIAL NOT NULL,
-    "authorId" INTEGER NOT NULL,
+    "authorId" TEXT NOT NULL,
     "authorType" "UserType" NOT NULL,
     "movieId" INTEGER NOT NULL,
     "title" TEXT NOT NULL,
@@ -105,7 +104,7 @@ CREATE TABLE "Review" (
 -- CreateTable
 CREATE TABLE "Comment" (
     "id" SERIAL NOT NULL,
-    "authorId" INTEGER NOT NULL,
+    "authorId" TEXT NOT NULL,
     "reviewId" INTEGER NOT NULL,
     "postTime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "lastUpdateTime" TIMESTAMP(3),
@@ -118,7 +117,7 @@ CREATE TABLE "Comment" (
 -- CreateTable
 CREATE TABLE "Collection" (
     "id" SERIAL NOT NULL,
-    "authorId" INTEGER NOT NULL,
+    "authorId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "creationTime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "lastUpdateTime" TIMESTAMP(3),
@@ -178,13 +177,13 @@ CREATE TABLE "_editor" (
 -- CreateTable
 CREATE TABLE "_MovieToUser" (
     "A" INTEGER NOT NULL,
-    "B" INTEGER NOT NULL
+    "B" TEXT NOT NULL
 );
 
 -- CreateTable
 CREATE TABLE "_review-thank" (
     "A" INTEGER NOT NULL,
-    "B" INTEGER NOT NULL
+    "B" TEXT NOT NULL
 );
 
 -- CreateTable
@@ -196,7 +195,7 @@ CREATE TABLE "_CollectionToMovie" (
 -- CreateTable
 CREATE TABLE "_collection-like" (
     "A" INTEGER NOT NULL,
-    "B" INTEGER NOT NULL
+    "B" TEXT NOT NULL
 );
 
 -- CreateIndex

@@ -1,14 +1,10 @@
-import { Prisma, PrismaClient, User } from '@prisma/client';
+import { User } from '@prisma/client';
+import { prismaClient } from './api-clients';
 
 export interface Context {
   currentUser: User | null;
 }
 
-export type PrismaTxClient = Omit<
-  PrismaClient<
-    Prisma.PrismaClientOptions,
-    never,
-    Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined
-  >,
-  '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'
->;
+type PrismaTransactionFunc = typeof prismaClient.$transaction;
+type PrismaTransaction = Parameters<PrismaTransactionFunc>[0];
+export type PrismaTxClient = Parameters<PrismaTransaction>[0];

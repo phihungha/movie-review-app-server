@@ -1,37 +1,48 @@
 import { PrismaClient, UserType, Gender } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import { applicationDefault, initializeApp } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
 
 const prisma = new PrismaClient();
+initializeApp({ credential: applicationDefault() });
 
 async function createCrewMember(name: string, avatarUrl?: string) {
   return await prisma.crewMember.create({
-    data: {
-      name,
-      avatarUrl,
-    },
+    data: { name, avatarUrl },
   });
 }
 
 async function createCompany(name: string) {
   return await prisma.company.create({
-    data: {
-      name,
-    },
+    data: { name },
   });
 }
 
-async function main() {
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash('12345678', salt);
+async function createFirebaseUser(
+  name: string,
+  email: string
+): Promise<string> {
+  let user;
+  try {
+    user = await getAuth().getUserByEmail(email);
+  } catch (err) {
+    user = await getAuth().createUser({
+      email,
+      displayName: name,
+      password: '12345678',
+    });
+  }
+  return user.uid;
+}
 
+async function main() {
   // Create users
   const johnRegular = await prisma.user.create({
     data: {
+      id: await createFirebaseUser('John Xina', 'john@gmail.com'),
       username: 'john',
       avatarUrl:
         'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/userProfileImages/2.webp',
       email: 'john@gmail.com',
-      hashedPassword,
       name: 'John Xina',
       userType: UserType.Regular,
       gender: Gender.Male,
@@ -42,11 +53,11 @@ async function main() {
 
   const janeRegular = await prisma.user.create({
     data: {
+      id: await createFirebaseUser('Jane Sauna', 'jane@gmail.com'),
       username: 'jane',
       avatarUrl:
         'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/userProfileImages/3.webp',
       email: 'jane@gmail.com',
-      hashedPassword,
       name: 'Jane Sauna',
       userType: UserType.Regular,
       gender: Gender.Female,
@@ -57,9 +68,9 @@ async function main() {
 
   const michikoRegular = await prisma.user.create({
     data: {
+      id: await createFirebaseUser('Michiko Oumae', 'michiko@gmail.com'),
       username: 'michiko',
       email: 'michiko@gmail.com',
-      hashedPassword,
       name: 'Michiko Oumae',
       userType: UserType.Regular,
       dateOfBirth: new Date(1986, 3, 9),
@@ -69,11 +80,11 @@ async function main() {
 
   const hungRegular = await prisma.user.create({
     data: {
+      id: await createFirebaseUser('Hà Phi Hùng', 'hung@gmail.com'),
       username: 'hung',
       avatarUrl:
         'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/userProfileImages/4.webp',
       email: 'hung@gmail.com',
-      hashedPassword,
       name: 'Hà Phi Hùng',
       userType: UserType.Regular,
       gender: Gender.Male,
@@ -84,10 +95,10 @@ async function main() {
 
   const thanosRegular = await prisma.user.create({
     data: {
+      id: await createFirebaseUser('Nguyễn Thị Thanos', 'thanos@gmail.com'),
       username: 'thanos',
       avatarUrl: 'aws-s3/abcd',
       email: 'thanos@gmail.com',
-      hashedPassword,
       name: 'Nguyễn Thị Thanos',
       userType: UserType.Regular,
       dateOfBirth: new Date(1995, 2, 14),
@@ -97,11 +108,11 @@ async function main() {
 
   const ebertCritic = await prisma.user.create({
     data: {
+      id: await createFirebaseUser('Roger Ebert', 'ebert@gmail.com'),
       username: 'ebert',
       avatarUrl:
         'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/userProfileImages/1.webp',
       email: 'ebert@gmail.com',
-      hashedPassword,
       name: 'Roger Ebert',
       userType: UserType.Critic,
       gender: Gender.Male,
@@ -112,11 +123,11 @@ async function main() {
 
   const kermodeCritic = await prisma.user.create({
     data: {
+      id: await createFirebaseUser('Mark Kemode', 'kemode@gmail.com'),
       username: 'kemode',
       avatarUrl:
         'https://filmnewforest.com/wp-content/uploads/2019/02/Mark-Kermode-image-2018-JE-200x300.jpg',
       email: 'kemode@gmail.com',
-      hashedPassword,
       name: 'Mark Kemode',
       userType: UserType.Critic,
       gender: Gender.Male,

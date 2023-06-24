@@ -14,7 +14,6 @@ import './user';
 import './review';
 import './comment';
 import './collection';
-import './login';
 import './root';
 
 export const gqlSchema = schemaBuilder.toSchema();

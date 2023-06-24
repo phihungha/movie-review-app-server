@@ -15,17 +15,16 @@ datasource db {
 }
 
 model User {
-  id             Int          @id @default(autoincrement())
-  username       String       @unique
-  avatarUrl      String?
-  email          String       @unique
-  hashedPassword String
-  name           String
-  userType       UserType
-  gender         Gender?
-  dateOfBirth    DateTime?
-  criticUser     CriticUser?
-  regularUser    RegularUser?
+  id          String       @id
+  username    String       @unique
+  avatarUrl   String?
+  email       String       @unique
+  name        String
+  userType    UserType
+  gender      Gender?
+  dateOfBirth DateTime?
+  criticUser  CriticUser?
+  regularUser RegularUser?
 
   reviews          Review[]     @relation(name: "review-author")
   reviewThanks     Review[]     @relation(name: "review-thank")
@@ -47,13 +46,13 @@ enum Gender {
 }
 
 model RegularUser {
-  user User @relation(fields: [id], references: [id])
-  id   Int  @id
+  user User   @relation(fields: [id], references: [id])
+  id   String @id
 }
 
 model CriticUser {
   user    User   @relation(fields: [id], references: [id])
-  id      Int    @id
+  id      String @id
   blogUrl String
 }
 
@@ -122,7 +121,7 @@ model Movie {
 model Review {
   id         Int      @id @default(autoincrement())
   author     User     @relation(name: "review-author", fields: [authorId], references: [id])
-  authorId   Int
+  authorId   String
   authorType UserType
   movie      Movie    @relation(fields: [movieId], references: [id])
   movieId    Int
@@ -143,7 +142,7 @@ model Review {
 model Comment {
   id       Int    @id @default(autoincrement())
   author   User   @relation(name: "comment-author", fields: [authorId], references: [id])
-  authorId Int
+  authorId String
   review   Review @relation(fields: [reviewId], references: [id])
   reviewId Int
 
@@ -154,9 +153,9 @@ model Comment {
 }
 
 model Collection {
-  id       Int  @id @default(autoincrement())
-  author   User @relation(name: "collection-author", fields: [authorId], references: [id])
-  authorId Int
+  id       Int    @id @default(autoincrement())
+  author   User   @relation(name: "collection-author", fields: [authorId], references: [id])
+  authorId String
 
   name           String
   creationTime   DateTime  @default(now())
