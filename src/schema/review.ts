@@ -28,6 +28,19 @@ schemaBuilder.prismaNode('Review', {
       query: { orderBy: { postTime: 'desc' } },
     }),
     commentCount: t.exposeInt('commentCount'),
+    isThankedByViewer: t.boolean({
+      nullable: true,
+      resolve: async (parent, _, context) => {
+        if (!context.currentUser) {
+          return null;
+        }
+        const result = await prismaClient.review.findUnique({
+          where: { id: parent.id },
+          include: { thankUsers: { where: { id: context.currentUser.id } } },
+        });
+        return result?.thankUsers.length === 1;
+      },
+    }),
   }),
 });
 

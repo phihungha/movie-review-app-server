@@ -309,6 +309,7 @@ type Movie implements Node {
   editors: [CrewMember!]!
   genres: [Genre!]!
   id: ID!
+  isViewedByViewer: Boolean
   numberOfReviewsPerScore(authorType: UserType!, score: Int!): Int!
   posterUrl: String
   productionCompanies: [Company!]!
@@ -712,6 +713,7 @@ type Review implements Node {
   content: String!
   externalUrl: String
   id: ID!
+  isThankedByViewer: Boolean
   movie: Movie!
   postTime: DateTime!
   score: Int!

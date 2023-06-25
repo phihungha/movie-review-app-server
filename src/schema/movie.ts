@@ -163,6 +163,19 @@ schemaBuilder.prismaNode('Movie', {
     viewedUsers: t.relatedConnection('viewedUsers', { cursor: 'id' }),
     viewedUserCount: t.exposeInt('viewedUserCount'),
     collections: t.relatedConnection('collections', { cursor: 'id' }),
+    isViewedByViewer: t.boolean({
+      nullable: true,
+      resolve: async (parent, _, context) => {
+        if (!context.currentUser) {
+          return null;
+        }
+        const result = await prismaClient.movie.findUnique({
+          where: { id: parent.id },
+          include: { viewedUsers: { where: { id: context.currentUser.id } } },
+        });
+        return result?.viewedUsers.length === 1;
+      },
+    }),
   }),
 });
 
