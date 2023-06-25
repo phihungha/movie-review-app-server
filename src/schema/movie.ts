@@ -214,6 +214,9 @@ schemaBuilder.queryFields((t) => ({
     args: {
       titleContains: t.arg.string(),
       genres: t.arg.stringList(),
+      releaseYear: t.arg.int({
+        validate: { min: 1900, max: new Date().getFullYear() },
+      }),
       minRegularScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
       maxRegularScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
       minCriticScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
@@ -234,6 +237,12 @@ schemaBuilder.queryFields((t) => ({
               name: { in: args.genres ?? undefined, mode: 'insensitive' },
             },
           },
+          releaseDate: args.releaseYear
+            ? {
+                gte: new Date(args.releaseYear, 1, 1),
+                lte: new Date(args.releaseYear, 12, 31),
+              }
+            : undefined,
           criticScore: {
             lte: args.maxCriticScore ?? 10,
             gte: args.minCriticScore ?? 0,

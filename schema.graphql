@@ -276,11 +276,6 @@ type GenreMoviesConnectionEdge {
   node: Movie!
 }
 
-"""
-A field whose value is a JSON Web Token (JWT): https://jwt.io/introduction.
-"""
-scalar Jwt
-
 type Movie implements Node {
   actingCredits: [ActingCredit!]!
   collections(
@@ -612,6 +607,7 @@ type Query {
     maxRegularScore: Int
     minCriticScore: Int
     minRegularScore: Int
+    releaseYear: Int
     sortBy: MovieSortBy
     sortDirection: SortDirection
     titleContains: String
