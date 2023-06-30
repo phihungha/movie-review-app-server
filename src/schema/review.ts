@@ -1,10 +1,12 @@
 import { Prisma, Review, UserType } from '@prisma/client';
 import { schemaBuilder } from '../schema-builder';
 import { prismaClient } from '../api-clients';
-import { PrismaTxClient } from '../types';
+import { ConnectionObjectType, PrismaTxClient } from '../types';
 import { AlreadyExistsError, NotFoundError } from '../errors';
+import { CommentConnection } from './comment';
+import { UserConnection } from './user';
 
-schemaBuilder.prismaNode('Review', {
+const Review = schemaBuilder.prismaNode('Review', {
   id: { field: 'id' },
   fields: (t) => ({
     author: t.relation('author'),
@@ -21,12 +23,20 @@ schemaBuilder.prismaNode('Review', {
     content: t.exposeString('content'),
     score: t.exposeInt('score'),
     externalUrl: t.exposeString('externalUrl', { nullable: true }),
-    thankUsers: t.relatedConnection('thankUsers', { cursor: 'id' }),
+    thankUsers: t.relatedConnection(
+      'thankUsers',
+      { cursor: 'id' },
+      UserConnection
+    ),
     thankCount: t.exposeInt('thankCount'),
-    comments: t.relatedConnection('comments', {
-      cursor: 'id',
-      query: { orderBy: { postTime: 'desc' } },
-    }),
+    comments: t.relatedConnection(
+      'comments',
+      {
+        cursor: 'id',
+        query: { orderBy: { postTime: 'desc' } },
+      },
+      CommentConnection
+    ),
     commentCount: t.exposeInt('commentCount'),
     isThankedByViewer: t.boolean({
       nullable: true,
@@ -43,6 +53,12 @@ schemaBuilder.prismaNode('Review', {
     }),
   }),
 });
+
+export const ReviewConnection: ConnectionObjectType =
+  schemaBuilder.connectionObject({
+    type: Review,
+    name: 'ReviewConnection',
+  });
 
 schemaBuilder.queryField('review', (t) =>
   t.prismaField({

@@ -4,6 +4,9 @@ import { schemaBuilder } from '../schema-builder';
 import { CollectionSortBy } from './enums/collection-sort-by';
 import { SortDirection } from './enums/sort-direction';
 import { NotFoundError } from '../errors';
+import { MovieConnection } from './movie';
+import { UserConnection } from './user';
+import { ConnectionObjectType } from '../types';
 
 const MIN_COLLECTION_NAME_LENGTH = 1;
 
@@ -25,7 +28,7 @@ export function getCollectionsOrderByQuery(
   }
 }
 
-schemaBuilder.prismaNode('Collection', {
+const Collection = schemaBuilder.prismaNode('Collection', {
   id: { field: 'id' },
   fields: (t) => ({
     author: t.relation('author'),
@@ -39,30 +42,45 @@ schemaBuilder.prismaNode('Collection', {
       nullable: true,
       resolve: (parent) => parent.lastUpdateTime,
     }),
-    movies: t.relatedConnection('movies', { cursor: 'id' }),
-    likeUsers: t.relatedConnection('likeUsers', { cursor: 'id' }),
+    movies: t.relatedConnection('movies', { cursor: 'id' }, MovieConnection),
+    likeUsers: t.relatedConnection(
+      'likeUsers',
+      { cursor: 'id' },
+      UserConnection
+    ),
     likeCount: t.exposeInt('likeCount'),
   }),
 });
 
+export const CollectionConnection: ConnectionObjectType =
+  schemaBuilder.connectionObject({
+    type: Collection,
+    name: 'CollectionConnection',
+  });
+
 schemaBuilder.queryFields((t) => ({
-  collections: t.prismaConnection({
-    type: 'Collection',
-    cursor: 'id',
-    args: {
-      nameContains: t.arg.string(),
-      sortBy: t.arg({ type: CollectionSortBy }),
-      sortDirection: t.arg({ type: SortDirection }),
+  collections: t.prismaConnection(
+    {
+      type: 'Collection',
+      cursor: 'id',
+      args: {
+        nameContains: t.arg.string(),
+        sortBy: t.arg({ type: CollectionSortBy }),
+        sortDirection: t.arg({ type: SortDirection }),
+      },
+      resolve: (query, _, args) =>
+        prismaClient.collection.findMany({
+          ...query,
+          where: {
+            name: {
+              contains: args.nameContains ? args.nameContains : undefined,
+            },
+          },
+          orderBy: getCollectionsOrderByQuery(args.sortBy, args.sortDirection),
+        }),
     },
-    resolve: (query, _, args) =>
-      prismaClient.collection.findMany({
-        ...query,
-        where: {
-          name: { contains: args.nameContains ? args.nameContains : undefined },
-        },
-        orderBy: getCollectionsOrderByQuery(args.sortBy, args.sortDirection),
-      }),
-  }),
+    CollectionConnection
+  ),
 
   collection: t.prismaField({
     type: 'Collection',
