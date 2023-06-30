@@ -2,10 +2,11 @@ import { Prisma } from '@prisma/client';
 import { prismaClient } from '../api-clients';
 import { NotFoundError } from '../errors';
 import { schemaBuilder } from '../schema-builder';
+import { ConnectionObjectType } from '../types';
 
 const MIN_COMMENT_LENGTH = 1;
 
-schemaBuilder.prismaNode('Comment', {
+const Comment = schemaBuilder.prismaNode('Comment', {
   id: { field: 'id' },
   fields: (t) => ({
     author: t.relation('author'),
@@ -22,6 +23,12 @@ schemaBuilder.prismaNode('Comment', {
     content: t.exposeString('content'),
   }),
 });
+
+export const CommentConnection: ConnectionObjectType =
+  schemaBuilder.connectionObject({
+    type: Comment,
+    name: 'CommentConnection',
+  });
 
 const CreateCommentInput = schemaBuilder.inputType('CreateCommentInput', {
   fields: (t) => ({

@@ -2,19 +2,23 @@ import { schemaBuilder } from '../schema-builder';
 import { Gender, Prisma, UserType } from '@prisma/client';
 import { ReviewSortBy } from './enums/review-sort-by';
 import { SortDirection } from './enums/sort-direction';
-import { getReviewsOrderByQuery } from './movie';
+import { MovieConnection, getReviewsOrderByQuery } from './movie';
 import { prismaClient, s3Client } from '../api-clients';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { userDateOfBirthSchema } from '../validation-schemas';
 import { AlreadyExistsError } from '../errors';
 import { getAuth } from 'firebase-admin/auth';
+import { ReviewConnection } from './review';
+import { CommentConnection } from './comment';
+import { CollectionConnection } from './collection';
+import { ConnectionObjectType } from '../types';
 
 async function getFirebaseUser(uid: string) {
   return await getAuth().getUser(uid);
 }
 
-schemaBuilder.prismaNode('User', {
+const User = schemaBuilder.prismaNode('User', {
   id: { field: 'id' },
   fields: (t) => ({
     username: t.exposeString('username'),
@@ -37,71 +41,107 @@ schemaBuilder.prismaNode('User', {
       resolve: (user) => user.criticUser?.blogUrl,
     }),
 
-    reviews: t.relatedConnection('reviews', {
-      cursor: 'id',
-      args: {
-        textContains: t.arg.string(),
-        minScore: t.arg.int(),
-        maxScore: t.arg.int(),
-        sortBy: t.arg({ type: ReviewSortBy }),
-        sortDirection: t.arg({ type: SortDirection }),
-      },
-      query: (args) => ({
-        where: {
-          score: { gte: args.minScore ?? 0, lte: args.maxScore ?? 10 },
-          OR: [
-            {
-              title: { contains: args.textContains ?? '', mode: 'insensitive' },
-            },
-            {
-              content: {
-                contains: args.textContains ?? '',
-                mode: 'insensitive',
+    reviews: t.relatedConnection(
+      'reviews',
+      {
+        cursor: 'id',
+        args: {
+          textContains: t.arg.string(),
+          minScore: t.arg.int(),
+          maxScore: t.arg.int(),
+          sortBy: t.arg({ type: ReviewSortBy }),
+          sortDirection: t.arg({ type: SortDirection }),
+        },
+        query: (args) => ({
+          where: {
+            score: { gte: args.minScore ?? 0, lte: args.maxScore ?? 10 },
+            OR: [
+              {
+                title: {
+                  contains: args.textContains ?? '',
+                  mode: 'insensitive',
+                },
               },
-            },
-          ],
-        },
-        orderBy: getReviewsOrderByQuery(args.sortBy, args.sortDirection),
-      }),
-    }),
-
-    reviewThanks: t.relatedConnection('reviewThanks', { cursor: 'id' }),
-
-    comments: t.relatedConnection('comments', {
-      cursor: 'id',
-      args: {
-        contentContains: t.arg.string(),
-      },
-      query: (args) => ({
-        where: {
-          content: {
-            contains: args.contentContains ?? '',
-            mode: 'insensitive',
+              {
+                content: {
+                  contains: args.textContains ?? '',
+                  mode: 'insensitive',
+                },
+              },
+            ],
           },
-        },
-        orderBy: { postTime: 'desc' },
-      }),
-    }),
+          orderBy: getReviewsOrderByQuery(args.sortBy, args.sortDirection),
+        }),
+      },
+      ReviewConnection
+    ),
 
-    viewedMovies: t.relatedConnection('viewedMovies', { cursor: 'id' }),
-    collections: t.relatedConnection('collections', { cursor: 'id' }),
-    likedCollections: t.relatedConnection('likedCollections', { cursor: 'id' }),
+    reviewThanks: t.relatedConnection(
+      'reviewThanks',
+      { cursor: 'id' },
+      ReviewConnection
+    ),
+
+    comments: t.relatedConnection(
+      'comments',
+      {
+        cursor: 'id',
+        args: {
+          contentContains: t.arg.string(),
+        },
+        query: (args) => ({
+          where: {
+            content: {
+              contains: args.contentContains ?? '',
+              mode: 'insensitive',
+            },
+          },
+          orderBy: { postTime: 'desc' },
+        }),
+      },
+      CommentConnection
+    ),
+
+    viewedMovies: t.relatedConnection(
+      'viewedMovies',
+      { cursor: 'id' },
+      MovieConnection
+    ),
+    collections: t.relatedConnection(
+      'collections',
+      { cursor: 'id' },
+      CollectionConnection
+    ),
+    likedCollections: t.relatedConnection(
+      'likedCollections',
+      { cursor: 'id' },
+      CollectionConnection
+    ),
   }),
 });
 
+export const UserConnection: ConnectionObjectType =
+  schemaBuilder.connectionObject({
+    type: User,
+    name: 'UserConnection',
+  });
+
 schemaBuilder.queryFields((t) => ({
-  users: t.prismaConnection({
-    type: 'User',
-    cursor: 'id',
-    args: {
-      nameContains: t.arg.string(),
+  users: t.prismaConnection(
+    {
+      type: 'User',
+      cursor: 'id',
+      args: {
+        nameContains: t.arg.string(),
+      },
+      resolve: (query, _, args) =>
+        prismaClient.user.findMany({
+          ...query,
+          where: { name: { contains: args.nameContains ?? undefined } },
+        }),
     },
-    resolve: (query, _, args) =>
-      prismaClient.user.findMany({
-        ...query,
-        where: { name: { contains: args.nameContains ?? undefined } },
-      }),
-  }),
+    UserConnection
+  ),
   user: t.prismaField({
     type: 'User',
     nullable: true,

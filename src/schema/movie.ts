@@ -7,6 +7,10 @@ import { ReviewSortBy } from './enums/review-sort-by';
 import { NotFoundError } from '../errors';
 import { calcDateOfBirthFromAge } from '../utils';
 import { reviewScoreSchema } from '../validation-schemas';
+import { ReviewConnection } from './review';
+import { UserConnection } from './user';
+import { CollectionConnection } from './collection';
+import { ConnectionObjectType } from '../types';
 
 export function getReviewsOrderByQuery(
   sortByArgValue: ReviewSortBy | undefined | null,
@@ -28,7 +32,7 @@ export function getReviewsOrderByQuery(
   }
 }
 
-schemaBuilder.prismaNode('Movie', {
+const Movie = schemaBuilder.prismaNode('Movie', {
   id: { field: 'id' },
   fields: (t) => ({
     title: t.exposeString('title'),
@@ -49,63 +53,77 @@ schemaBuilder.prismaNode('Movie', {
     composers: t.relation('composers'),
     actingCredits: t.relation('actingCredits'),
 
-    criticReviews: t.relatedConnection('reviews', {
-      cursor: 'id',
-      args: {
-        textContains: t.arg.string(),
-        minScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
-        maxScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
-        sortBy: t.arg({ type: ReviewSortBy }),
-        sortDirection: t.arg({ type: SortDirection }),
-      },
-      query: (args) => ({
-        where: {
-          authorType: UserType.Critic,
-          score: { gte: args.minScore ?? 0, lte: args.maxScore ?? 10 },
-          OR: [
-            {
-              title: { contains: args.textContains ?? '', mode: 'insensitive' },
-            },
-            {
-              content: {
-                contains: args.textContains ?? '',
-                mode: 'insensitive',
-              },
-            },
-          ],
+    criticReviews: t.relatedConnection(
+      'reviews',
+      {
+        cursor: 'id',
+        args: {
+          textContains: t.arg.string(),
+          minScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
+          maxScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
+          sortBy: t.arg({ type: ReviewSortBy }),
+          sortDirection: t.arg({ type: SortDirection }),
         },
-        orderBy: getReviewsOrderByQuery(args.sortBy, args.sortDirection),
-      }),
-    }),
+        query: (args) => ({
+          where: {
+            authorType: UserType.Critic,
+            score: { gte: args.minScore ?? 0, lte: args.maxScore ?? 10 },
+            OR: [
+              {
+                title: {
+                  contains: args.textContains ?? '',
+                  mode: 'insensitive',
+                },
+              },
+              {
+                content: {
+                  contains: args.textContains ?? '',
+                  mode: 'insensitive',
+                },
+              },
+            ],
+          },
+          orderBy: getReviewsOrderByQuery(args.sortBy, args.sortDirection),
+        }),
+      },
+      ReviewConnection
+    ),
 
-    regularReviews: t.relatedConnection('reviews', {
-      cursor: 'id',
-      args: {
-        textContains: t.arg.string(),
-        minScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
-        maxScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
-        sortBy: t.arg({ type: ReviewSortBy }),
-        sortDirection: t.arg({ type: SortDirection }),
-      },
-      query: (args) => ({
-        where: {
-          authorType: UserType.Regular,
-          score: { gte: args.minScore ?? 0, lte: args.maxScore ?? 10 },
-          OR: [
-            {
-              title: { contains: args.textContains ?? '', mode: 'insensitive' },
-            },
-            {
-              content: {
-                contains: args.textContains ?? '',
-                mode: 'insensitive',
-              },
-            },
-          ],
+    regularReviews: t.relatedConnection(
+      'reviews',
+      {
+        cursor: 'id',
+        args: {
+          textContains: t.arg.string(),
+          minScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
+          maxScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
+          sortBy: t.arg({ type: ReviewSortBy }),
+          sortDirection: t.arg({ type: SortDirection }),
         },
-        orderBy: getReviewsOrderByQuery(args.sortBy, args.sortDirection),
-      }),
-    }),
+        query: (args) => ({
+          where: {
+            authorType: UserType.Regular,
+            score: { gte: args.minScore ?? 0, lte: args.maxScore ?? 10 },
+            OR: [
+              {
+                title: {
+                  contains: args.textContains ?? '',
+                  mode: 'insensitive',
+                },
+              },
+              {
+                content: {
+                  contains: args.textContains ?? '',
+                  mode: 'insensitive',
+                },
+              },
+            ],
+          },
+          orderBy: getReviewsOrderByQuery(args.sortBy, args.sortDirection),
+        }),
+      },
+      ReviewConnection
+    ),
 
     regularScore: t.exposeFloat('regularScore', { nullable: true }),
     regularReviewCount: t.exposeInt('regularReviewCount'),
@@ -160,9 +178,12 @@ schemaBuilder.prismaNode('Movie', {
         }),
     }),
 
-    viewedUsers: t.relatedConnection('viewedUsers', { cursor: 'id' }),
+    viewedUsers: t.relatedConnection(
+      'viewedUsers',
+      { cursor: 'id' },
+      UserConnection
+    ),
     viewedUserCount: t.exposeInt('viewedUserCount'),
-    collections: t.relatedConnection('collections', { cursor: 'id' }),
     isViewedByViewer: t.boolean({
       nullable: true,
       resolve: async (parent, _, context) => {
@@ -176,8 +197,20 @@ schemaBuilder.prismaNode('Movie', {
         return result?.viewedUsers.length === 1;
       },
     }),
+
+    collections: t.relatedConnection(
+      'collections',
+      { cursor: 'id' },
+      CollectionConnection
+    ),
   }),
 });
+
+export const MovieConnection: ConnectionObjectType =
+  schemaBuilder.connectionObject({
+    type: Movie,
+    name: 'MovieConnection',
+  });
 
 function getMoviesOrderByQuery(
   sortByArgValue: MovieSortBy | undefined | null,
@@ -208,78 +241,87 @@ function calcTrendingDateLimit(): Date {
 }
 
 schemaBuilder.queryFields((t) => ({
-  movies: t.prismaConnection({
-    type: 'Movie',
-    cursor: 'id',
-    args: {
-      titleContains: t.arg.string(),
-      genres: t.arg.stringList(),
-      releaseYear: t.arg.int({
-        validate: { min: 1900, max: new Date().getFullYear() },
-      }),
-      minRegularScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
-      maxRegularScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
-      minCriticScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
-      maxCriticScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
-      sortBy: t.arg({ type: MovieSortBy }),
-      sortDirection: t.arg({ type: SortDirection }),
-    },
-    resolve: async (query, _, args) =>
-      prismaClient.movie.findMany({
-        ...query,
-        where: {
-          title: {
-            contains: args.titleContains ?? undefined,
-            mode: 'insensitive',
-          },
-          genres: {
-            some: {
-              name: { in: args.genres ?? undefined, mode: 'insensitive' },
+  movies: t.prismaConnection(
+    {
+      type: 'Movie',
+      cursor: 'id',
+      args: {
+        titleContains: t.arg.string(),
+        genres: t.arg.stringList(),
+        releaseYear: t.arg.int({
+          validate: { min: 1900, max: new Date().getFullYear() },
+        }),
+        minRegularScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
+        maxRegularScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
+        minCriticScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
+        maxCriticScore: t.arg.int({ validate: { schema: reviewScoreSchema } }),
+        sortBy: t.arg({ type: MovieSortBy }),
+        sortDirection: t.arg({ type: SortDirection }),
+      },
+      resolve: async (query, _, args) =>
+        prismaClient.movie.findMany({
+          ...query,
+          where: {
+            title: {
+              contains: args.titleContains ?? undefined,
+              mode: 'insensitive',
+            },
+            genres: {
+              some: {
+                name: { in: args.genres ?? undefined, mode: 'insensitive' },
+              },
+            },
+            releaseDate: args.releaseYear
+              ? {
+                  gte: new Date(args.releaseYear, 1, 1),
+                  lte: new Date(args.releaseYear, 12, 31),
+                }
+              : undefined,
+            criticScore: {
+              lte: args.maxCriticScore ?? 10,
+              gte: args.minCriticScore ?? 0,
+            },
+            regularScore: {
+              lte: args.maxRegularScore ?? 10,
+              gte: args.minRegularScore ?? 0,
             },
           },
-          releaseDate: args.releaseYear
-            ? {
-                gte: new Date(args.releaseYear, 1, 1),
-                lte: new Date(args.releaseYear, 12, 31),
-              }
-            : undefined,
-          criticScore: {
-            lte: args.maxCriticScore ?? 10,
-            gte: args.minCriticScore ?? 0,
-          },
-          regularScore: {
-            lte: args.maxRegularScore ?? 10,
-            gte: args.minRegularScore ?? 0,
-          },
-        },
-        orderBy: getMoviesOrderByQuery(args.sortBy, args.sortDirection),
-      }),
-  }),
+          orderBy: getMoviesOrderByQuery(args.sortBy, args.sortDirection),
+        }),
+    },
+    MovieConnection
+  ),
 
-  trendingMovies: t.prismaConnection({
-    type: 'Movie',
-    cursor: 'id',
-    resolve: (query) =>
-      prismaClient.movie.findMany({
-        ...query,
-        where: {
-          releaseDate: { gte: calcTrendingDateLimit() },
-        },
-        orderBy: {
-          viewedUserCount: 'desc',
-        },
-      }),
-  }),
+  trendingMovies: t.prismaConnection(
+    {
+      type: 'Movie',
+      cursor: 'id',
+      resolve: (query) =>
+        prismaClient.movie.findMany({
+          ...query,
+          where: {
+            releaseDate: { gte: calcTrendingDateLimit() },
+          },
+          orderBy: {
+            viewedUserCount: 'desc',
+          },
+        }),
+    },
+    MovieConnection
+  ),
 
-  justReleasedMovies: t.prismaConnection({
-    type: 'Movie',
-    cursor: 'id',
-    resolve: (query) =>
-      prismaClient.movie.findMany({
-        ...query,
-        orderBy: { releaseDate: 'desc' },
-      }),
-  }),
+  justReleasedMovies: t.prismaConnection(
+    {
+      type: 'Movie',
+      cursor: 'id',
+      resolve: (query) =>
+        prismaClient.movie.findMany({
+          ...query,
+          orderBy: { releaseDate: 'desc' },
+        }),
+    },
+    MovieConnection
+  ),
 
   movie: t.prismaField({
     type: 'Movie',
