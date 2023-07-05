@@ -34,7 +34,7 @@ const User = schemaBuilder.prismaNode('User', {
       nullable: true,
       resolve: (parent) => parent.dateOfBirth,
     }),
-    userType: t.exposeString('userType'),
+    userType: t.field({ type: UserType, resolve: (parent) => parent.userType }),
     blogUrl: t.string({
       nullable: true,
       select: { criticUser: true },

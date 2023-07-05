@@ -127,6 +127,14 @@ type CrewMemberWorkedOnMoviesConnectionEdge {
   node: WorkCredit!
 }
 
+enum CrewWorkRole {
+  Composer
+  Director
+  DoP
+  Editor
+  Writer
+}
+
 input CriticSignUpInput {
   blogUrl: String!
   dateOfBirth: Date
@@ -589,7 +597,7 @@ type User implements Node {
     sortDirection: SortDirection
     textContains: String
   ): ReviewConnection!
-  userType: String!
+  userType: UserType!
   username: String!
   viewedMovies(after: ID, before: ID, first: Int, last: Int): MovieConnection!
 }
@@ -618,5 +626,5 @@ type WorkCredit implements Node {
   crew: CrewMember!
   id: ID!
   movie: Movie!
-  role: String!
+  role: CrewWorkRole!
 }

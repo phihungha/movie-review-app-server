@@ -1,3 +1,4 @@
+import { CrewWorkRole } from '@prisma/client';
 import { schemaBuilder } from '../schema-builder';
 
 schemaBuilder.prismaNode('WorkCredit', {
@@ -5,6 +6,6 @@ schemaBuilder.prismaNode('WorkCredit', {
   fields: (t) => ({
     crew: t.relation('crew'),
     movie: t.relation('movie'),
-    role: t.exposeString('role'),
+    role: t.field({ type: CrewWorkRole, resolve: (parent) => parent.role }),
   }),
 });
