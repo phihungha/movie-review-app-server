@@ -231,6 +231,7 @@ type Movie implements Node {
   title: String!
   viewedUserCount: Int!
   viewedUsers(after: ID, before: ID, first: Int, last: Int): UserConnection!
+  viewerReview: Review
   workCredits: [WorkCredit!]!
 }
 
