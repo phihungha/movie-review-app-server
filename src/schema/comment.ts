@@ -21,6 +21,15 @@ const Comment = schemaBuilder.prismaNode('Comment', {
       resolve: (parent) => parent.lastUpdateTime,
     }),
     content: t.exposeString('content'),
+    isMine: t.boolean({
+      nullable: true,
+      resolve: async (parent, _, context) => {
+        if (!context.currentUser) {
+          return null;
+        }
+        return parent.authorId === context.currentUser.id;
+      },
+    }),
   }),
 });
 

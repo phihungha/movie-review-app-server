@@ -51,6 +51,15 @@ const Review = schemaBuilder.prismaNode('Review', {
         return result?.thankUsers.length === 1;
       },
     }),
+    isMine: t.boolean({
+      nullable: true,
+      resolve: async (parent, _, context) => {
+        if (!context.currentUser) {
+          return null;
+        }
+        return parent.authorId === context.currentUser.id;
+      },
+    }),
   }),
 });
 

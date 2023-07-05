@@ -48,6 +48,7 @@ type Comment implements Node {
   author: User!
   content: String!
   id: ID!
+  isMine: Boolean
   lastUpdateTime: DateTime
   postTime: DateTime!
   review: Review!
@@ -494,6 +495,7 @@ type Review implements Node {
   content: String!
   externalUrl: String
   id: ID!
+  isMine: Boolean
   isThankedByViewer: Boolean
   movie: Movie!
   postTime: DateTime!
