@@ -48,6 +48,7 @@ type Comment implements Node {
   author: User!
   content: String!
   id: ID!
+  isMine: Boolean
   lastUpdateTime: DateTime
   postTime: DateTime!
   review: Review!
@@ -89,14 +90,49 @@ input CreateReviewInput {
 }
 
 type CrewMember implements Node {
+  actedMovies(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): CrewMemberActedMoviesConnection!
   avatarUrl: String
-  directedMovies(after: ID, before: ID, first: Int, last: Int): MovieConnection!
-  dopMovies(after: ID, before: ID, first: Int, last: Int): MovieConnection!
-  editedMovies(after: ID, before: ID, first: Int, last: Int): MovieConnection!
   id: ID!
   name: String!
-  scoredMovies(after: ID, before: ID, first: Int, last: Int): MovieConnection!
-  writtenMovies(after: ID, before: ID, first: Int, last: Int): MovieConnection!
+  workedOnMovies(
+    after: ID
+    before: ID
+    first: Int
+    last: Int
+  ): CrewMemberWorkedOnMoviesConnection!
+}
+
+type CrewMemberActedMoviesConnection {
+  edges: [CrewMemberActedMoviesConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type CrewMemberActedMoviesConnectionEdge {
+  cursor: ID!
+  node: ActingCredit!
+}
+
+type CrewMemberWorkedOnMoviesConnection {
+  edges: [CrewMemberWorkedOnMoviesConnectionEdge]!
+  pageInfo: PageInfo!
+}
+
+type CrewMemberWorkedOnMoviesConnectionEdge {
+  cursor: ID!
+  node: WorkCredit!
+}
+
+enum CrewWorkRole {
+  Composer
+  Director
+  DoP
+  Editor
+  Writer
 }
 
 input CriticSignUpInput {
@@ -164,7 +200,6 @@ type Movie implements Node {
     first: Int
     last: Int
   ): CollectionConnection!
-  composers: [CrewMember!]!
   criticReviewCount: Int!
   criticReviews(
     after: ID
@@ -178,10 +213,7 @@ type Movie implements Node {
     textContains: String
   ): ReviewConnection!
   criticScore: Float
-  directors: [CrewMember!]!
   distributedCompanies: [Company!]!
-  dops: [CrewMember!]!
-  editors: [CrewMember!]!
   genres: [Genre!]!
   id: ID!
   isViewedByViewer: Boolean
@@ -207,7 +239,8 @@ type Movie implements Node {
   title: String!
   viewedUserCount: Int!
   viewedUsers(after: ID, before: ID, first: Int, last: Int): UserConnection!
-  writers: [CrewMember!]!
+  viewerReview: Review
+  workCredits: [WorkCredit!]!
 }
 
 type MovieConnection {
@@ -250,8 +283,12 @@ type Mutation {
     movieIds: [ID!]!
   ): MutationRemoveFromCollectionResult!
   thankReview(reviewId: ID!, thank: Boolean!): MutationThankReviewResult!
-  updateCriticUser(input: CriticUserUpdateInput!): User!
-  updateRegularUser(input: RegularUserUpdateInput!): User!
+  updateCriticUser(
+    input: CriticUserUpdateInput!
+  ): MutationUpdateCriticUserResult!
+  updateRegularUser(
+    input: RegularUserUpdateInput!
+  ): MutationUpdateRegularUserResult!
 }
 
 union MutationAddToCollectionResult =
@@ -409,6 +446,26 @@ type MutationThankReviewSuccess {
   data: Review!
 }
 
+union MutationUpdateCriticUserResult =
+    AuthError
+  | BaseError
+  | MutationUpdateCriticUserSuccess
+  | ValidationError
+
+type MutationUpdateCriticUserSuccess {
+  data: User!
+}
+
+union MutationUpdateRegularUserResult =
+    AuthError
+  | BaseError
+  | MutationUpdateRegularUserSuccess
+  | ValidationError
+
+type MutationUpdateRegularUserSuccess {
+  data: User!
+}
+
 interface Node {
   id: ID!
 }
@@ -494,6 +551,7 @@ type Review implements Node {
   content: String!
   externalUrl: String
   id: ID!
+  isMine: Boolean
   isThankedByViewer: Boolean
   movie: Movie!
   postTime: DateTime!
@@ -586,4 +644,11 @@ enum UserType {
 type ValidationError implements Error {
   fieldErrors: [FieldValidationError!]!
   message: String!
+}
+
+type WorkCredit implements Node {
+  crew: CrewMember!
+  id: ID!
+  movie: Movie!
+  role: CrewWorkRole!
 }

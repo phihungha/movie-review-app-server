@@ -202,11 +202,17 @@ async function main() {
         connect: [{ id: warnerBrosCorp.id }],
       },
 
-      directors: { connect: [{ id: nolanDirector.id }] },
-      writers: { connect: [{ id: nolanDirector.id }] },
-      dops: { connect: [{ id: hoytemaDop.id }] },
-      editors: { connect: [{ id: lameEditor.id }] },
-      composers: { connect: [{ id: goranssonComposer.id }] },
+      workCredits: {
+        createMany: {
+          data: [
+            { crewId: nolanDirector.id, role: 'Director' },
+            { crewId: nolanDirector.id, role: 'Writer' },
+            { crewId: hoytemaDop.id, role: 'DoP' },
+            { crewId: lameEditor.id, role: 'Editor' },
+            { crewId: goranssonComposer.id, role: 'Composer' },
+          ],
+        },
+      },
       actingCredits: {
         createMany: {
           data: [
@@ -271,13 +277,18 @@ async function main() {
         connect: [{ id: warnerBrosCorp.id }],
       },
 
-      directors: { connect: [{ id: villeneuveDirector.id }] },
-      writers: {
-        connect: [{ id: villeneuveDirector.id }, { id: spaihtsWriter.id }],
+      workCredits: {
+        createMany: {
+          data: [
+            { crewId: villeneuveDirector.id, role: 'Director' },
+            { crewId: villeneuveDirector.id, role: 'Writer' },
+            { crewId: spaihtsWriter.id, role: 'Writer' },
+            { crewId: fraserDop.id, role: 'DoP' },
+            { crewId: walkerEditor.id, role: 'Editor' },
+            { crewId: zimmerComposer.id, role: 'Composer' },
+          ],
+        },
       },
-      dops: { connect: [{ id: fraserDop.id }] },
-      editors: { connect: [{ id: walkerEditor.id }] },
-      composers: { connect: [{ id: zimmerComposer.id }] },
       actingCredits: {
         createMany: {
           data: [

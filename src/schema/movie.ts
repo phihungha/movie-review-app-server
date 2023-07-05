@@ -2,12 +2,12 @@ import { schemaBuilder } from '../schema-builder';
 import { prismaClient } from '../api-clients';
 import { MovieSortBy } from './enums/movie-sort-by';
 import { SortDirection } from './enums/sort-direction';
-import { Gender, Prisma, UserType } from '@prisma/client';
+import { Gender, Prisma, UserType, Review as ReviewDb } from '@prisma/client';
 import { ReviewSortBy } from './enums/review-sort-by';
 import { NotFoundError } from '../errors';
 import { calcDateOfBirthFromAge } from '../utils';
 import { reviewScoreSchema } from '../validation-schemas';
-import { ReviewConnection } from './review';
+import { Review, ReviewConnection } from './review';
 import { UserConnection } from './user';
 import { CollectionConnection } from './collection';
 import { ConnectionObjectType } from '../types';
@@ -45,12 +45,7 @@ const Movie = schemaBuilder.prismaNode('Movie', {
     genres: t.relation('genres'),
     productionCompanies: t.relation('productionCompanies'),
     distributedCompanies: t.relation('distributionCompanies'),
-
-    directors: t.relation('directors'),
-    writers: t.relation('writers'),
-    dops: t.relation('dops'),
-    editors: t.relation('editors'),
-    composers: t.relation('composers'),
+    workCredits: t.relation('workCredits'),
     actingCredits: t.relation('actingCredits'),
 
     criticReviews: t.relatedConnection(
@@ -88,7 +83,6 @@ const Movie = schemaBuilder.prismaNode('Movie', {
       },
       ReviewConnection
     ),
-
     regularReviews: t.relatedConnection(
       'reviews',
       {
@@ -124,6 +118,21 @@ const Movie = schemaBuilder.prismaNode('Movie', {
       },
       ReviewConnection
     ),
+    viewerReview: t.prismaField({
+      type: Review,
+      nullable: true,
+      resolve: async (query, parent, _, context) => {
+        if (!context.currentUser?.id) {
+          return null;
+        }
+
+        const result = await prismaClient.review.findMany({
+          ...query,
+          where: { authorId: context.currentUser?.id, movieId: parent.id },
+        });
+        return result.length === 0 ? null : result[0];
+      },
+    }),
 
     regularScore: t.exposeFloat('regularScore', { nullable: true }),
     regularReviewCount: t.exposeInt('regularReviewCount'),

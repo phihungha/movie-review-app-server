@@ -327,6 +327,7 @@ schemaBuilder.mutationFields((t) => ({
   updateCriticUser: t.prismaField({
     type: 'User',
     authScopes: { criticUser: true },
+    errors: {},
     args: {
       input: t.arg({ type: CriticUserUpdateInput, required: true }),
     },
@@ -370,6 +371,7 @@ schemaBuilder.mutationFields((t) => ({
   updateRegularUser: t.prismaField({
     type: 'User',
     authScopes: { regularUser: true },
+    errors: {},
     args: {
       input: t.arg({ type: RegularUserUpdateInput, required: true }),
     },

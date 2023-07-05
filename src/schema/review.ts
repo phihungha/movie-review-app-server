@@ -1,4 +1,4 @@
-import { Prisma, Review, UserType } from '@prisma/client';
+import { Prisma, Review as ReviewDb, UserType } from '@prisma/client';
 import { schemaBuilder } from '../schema-builder';
 import { prismaClient } from '../api-clients';
 import { ConnectionObjectType, PrismaTxClient } from '../types';
@@ -6,7 +6,7 @@ import { AlreadyExistsError, NotFoundError } from '../errors';
 import { CommentConnection } from './comment';
 import { UserConnection } from './user';
 
-const Review = schemaBuilder.prismaNode('Review', {
+export const Review = schemaBuilder.prismaNode('Review', {
   id: { field: 'id' },
   fields: (t) => ({
     author: t.relation('author'),
@@ -51,6 +51,15 @@ const Review = schemaBuilder.prismaNode('Review', {
         return result?.thankUsers.length === 1;
       },
     }),
+    isMine: t.boolean({
+      nullable: true,
+      resolve: async (parent, _, context) => {
+        if (!context.currentUser) {
+          return null;
+        }
+        return parent.authorId === context.currentUser.id;
+      },
+    }),
   }),
 });
 
@@ -75,7 +84,7 @@ schemaBuilder.queryField('review', (t) =>
   })
 );
 
-async function updateAggregateData(txClient: PrismaTxClient, review: Review) {
+async function updateAggregateData(txClient: PrismaTxClient, review: ReviewDb) {
   const movieId = review.movieId;
   const authorType = review.authorType;
 
