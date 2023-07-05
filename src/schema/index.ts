@@ -8,6 +8,7 @@ import './scalars';
 import './genre';
 import './crew-member';
 import './acting-credit';
+import './work-credit';
 import './company';
 import './movie';
 import './user';

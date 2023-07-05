@@ -73,12 +73,26 @@ model CrewMember {
   id             Int            @id @default(autoincrement())
   name           String
   avatarUrl      String?
-  directedMovies Movie[]        @relation(name: "director")
-  writtenMovies  Movie[]        @relation(name: "writer")
-  dopMovies      Movie[]        @relation(name: "dop")
-  scoredMovies   Movie[]        @relation(name: "composer")
-  editedMovies   Movie[]        @relation(name: "editor")
+  workedOnMovies WorkCredit[]
   actedMovies    ActingCredit[]
+}
+
+model WorkCredit {
+  crew    CrewMember   @relation(fields: [crewId], references: [id])
+  crewId  Int
+  movie   Movie        @relation(fields: [movieId], references: [id])
+  movieId Int
+  role    CrewWorkRole
+
+  @@id([crewId, movieId, role])
+}
+
+enum CrewWorkRole {
+  Director
+  Writer
+  DoP
+  Composer
+  Editor
 }
 
 model ActingCredit {
@@ -88,7 +102,7 @@ model ActingCredit {
   movieId       Int
   characterName String
 
-  @@id([crewId, movieId])
+  @@id([crewId, movieId, characterName])
 }
 
 model Movie {
@@ -101,11 +115,7 @@ model Movie {
   productionCompanies   Company[] @relation(name: "production-company")
   distributionCompanies Company[] @relation(name: "distribution-company")
 
-  directors     CrewMember[]   @relation(name: "director")
-  writers       CrewMember[]   @relation(name: "writer")
-  dops          CrewMember[]   @relation(name: "dop")
-  editors       CrewMember[]   @relation(name: "editor")
-  composers     CrewMember[]   @relation(name: "composer")
+  workCredits   WorkCredit[]
   actingCredits ActingCredit[]
 
   reviews            Review[]

@@ -45,12 +45,7 @@ const Movie = schemaBuilder.prismaNode('Movie', {
     genres: t.relation('genres'),
     productionCompanies: t.relation('productionCompanies'),
     distributedCompanies: t.relation('distributionCompanies'),
-
-    directors: t.relation('directors'),
-    writers: t.relation('writers'),
-    dops: t.relation('dops'),
-    editors: t.relation('editors'),
-    composers: t.relation('composers'),
+    workCredits: t.relation('workCredits'),
     actingCredits: t.relation('actingCredits'),
 
     criticReviews: t.relatedConnection(
