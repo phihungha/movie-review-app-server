@@ -283,8 +283,12 @@ type Mutation {
     movieIds: [ID!]!
   ): MutationRemoveFromCollectionResult!
   thankReview(reviewId: ID!, thank: Boolean!): MutationThankReviewResult!
-  updateCriticUser(input: CriticUserUpdateInput!): User!
-  updateRegularUser(input: RegularUserUpdateInput!): User!
+  updateCriticUser(
+    input: CriticUserUpdateInput!
+  ): MutationUpdateCriticUserResult!
+  updateRegularUser(
+    input: RegularUserUpdateInput!
+  ): MutationUpdateRegularUserResult!
 }
 
 union MutationAddToCollectionResult =
@@ -440,6 +444,26 @@ union MutationThankReviewResult =
 
 type MutationThankReviewSuccess {
   data: Review!
+}
+
+union MutationUpdateCriticUserResult =
+    AuthError
+  | BaseError
+  | MutationUpdateCriticUserSuccess
+  | ValidationError
+
+type MutationUpdateCriticUserSuccess {
+  data: User!
+}
+
+union MutationUpdateRegularUserResult =
+    AuthError
+  | BaseError
+  | MutationUpdateRegularUserSuccess
+  | ValidationError
+
+type MutationUpdateRegularUserSuccess {
+  data: User!
 }
 
 interface Node {
