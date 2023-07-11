@@ -73,6 +73,11 @@ schemaBuilder.mutationFields((t) => ({
         // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
         const currentUserId = context.currentUser!.id;
 
+        await client.review.update({
+          where: { id: +args.input.reviewId.id },
+          data: { commentCount: { increment: 1 } },
+        });
+
         let review;
         try {
           review = await client.comment.create({
@@ -93,11 +98,6 @@ schemaBuilder.mutationFields((t) => ({
             throw err;
           }
         }
-
-        client.review.update({
-          where: { id: +args.input.reviewId.id },
-          data: { commentCount: { increment: 1 } },
-        });
 
         return review;
       }),
@@ -151,7 +151,21 @@ schemaBuilder.mutationFields((t) => ({
         const currentUserId = context.currentUser!.id;
         const id = +args.id.id;
 
-        const comment = await client.comment.update({
+        const comment = await client.comment.findUnique({ where: { id } });
+        if (
+          !comment ||
+          comment.authorId !== currentUserId ||
+          comment.isRemoved
+        ) {
+          throw new NotFoundError();
+        }
+
+        await client.review.update({
+          where: { id: comment.reviewId },
+          data: { commentCount: { decrement: 1 } },
+        });
+
+        const deletedComment = await client.comment.update({
           ...query,
           where: { id },
           data: {
@@ -161,19 +175,7 @@ schemaBuilder.mutationFields((t) => ({
           },
         });
 
-        if (comment.authorId !== currentUserId) {
-          throw new NotFoundError();
-        }
-
-        const commentCount = await client.comment.count({
-          where: { reviewId: comment.reviewId, isRemoved: false },
-        });
-        await client.review.update({
-          where: { id: comment.reviewId },
-          data: { commentCount },
-        });
-
-        return comment;
+        return deletedComment;
       }),
   }),
 }));
