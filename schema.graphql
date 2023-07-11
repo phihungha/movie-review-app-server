@@ -254,11 +254,11 @@ type MovieEdge {
 }
 
 enum MovieSortBy {
-  criticScore
-  regularScore
-  releaseDate
-  title
-  viewedUserCount
+  CriticScore
+  RegularScore
+  ReleaseDate
+  Title
+  ViewedUserCount
 }
 
 type Mutation {

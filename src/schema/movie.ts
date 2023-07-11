@@ -230,15 +230,15 @@ function getMoviesOrderByQuery(
   }
   const orderByDirection = sortDirection === SortDirection.Asc ? 'asc' : 'desc';
   switch (sortByArgValue) {
-    case MovieSortBy.title:
+    case MovieSortBy.Title:
       return { title: orderByDirection };
-    case MovieSortBy.releaseDate:
+    case MovieSortBy.ReleaseDate:
       return { releaseDate: orderByDirection };
-    case MovieSortBy.criticScore:
+    case MovieSortBy.CriticScore:
       return { criticScore: orderByDirection };
-    case MovieSortBy.regularScore:
+    case MovieSortBy.RegularScore:
       return { regularScore: orderByDirection };
-    case MovieSortBy.viewedUserCount:
+    case MovieSortBy.ViewedUserCount:
       return { viewedUserCount: orderByDirection };
   }
 }
