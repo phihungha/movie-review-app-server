@@ -89,23 +89,12 @@ async function getCurrentAggregateData(
   movieId: number,
   authorType: UserType
 ) {
-  try {
-    const result = await txClient.review.aggregate({
-      _sum: { score: true },
-      _count: { id: true },
-      where: { movieId, authorType },
-    });
-    return { scoreSum: result._sum.score, reviewCount: result._count.id };
-  } catch (err) {
-    if (
-      err instanceof Prisma.PrismaClientKnownRequestError &&
-      err.code === 'P2025'
-    ) {
-      throw new NotFoundError('Movie not found');
-    } else {
-      throw err;
-    }
-  }
+  const result = await txClient.review.aggregate({
+    _sum: { score: true },
+    _count: { id: true },
+    where: { movieId, authorType },
+  });
+  return { scoreSum: result._sum.score, reviewCount: result._count.id };
 }
 
 async function updateAggregateData(
@@ -169,12 +158,13 @@ schemaBuilder.mutationFields((t) => ({
       prismaClient.$transaction(async (client) => {
         // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
         const currentUser = context.currentUser!;
+        const currentUserId = currentUser.id;
         const movieId = +args.input.movieId.id;
         const authorType = currentUser.userType;
         const score = args.input.score;
 
         const existingReviews = await client.review.findMany({
-          where: { authorId: currentUser.id, movieId: +args.input.movieId.id },
+          where: { authorId: currentUserId, movieId },
         });
         if (existingReviews.length !== 0) {
           throw new AlreadyExistsError(
@@ -198,18 +188,29 @@ schemaBuilder.mutationFields((t) => ({
           authorType
         );
 
-        return await client.review.create({
-          ...query,
-          data: {
-            title: args.input.title,
-            content: args.input.content,
-            score: args.input.score,
-            movie: { connect: { id: movieId } },
-            author: { connect: { id: currentUser.id } },
-            authorType,
-            externalUrl: args.input.externalUrl,
-          },
-        });
+        try {
+          return await client.review.create({
+            ...query,
+            data: {
+              title: args.input.title,
+              content: args.input.content,
+              score: args.input.score,
+              movie: { connect: { id: movieId } },
+              author: { connect: { id: currentUserId } },
+              authorType,
+              externalUrl: args.input.externalUrl,
+            },
+          });
+        } catch (err) {
+          if (
+            err instanceof Prisma.PrismaClientKnownRequestError &&
+            err.code === 'P2025'
+          ) {
+            throw new NotFoundError('Movie not found');
+          } else {
+            throw err;
+          }
+        }
       }),
   }),
 

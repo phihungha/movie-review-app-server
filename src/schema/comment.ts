@@ -69,24 +69,14 @@ schemaBuilder.mutationFields((t) => ({
     },
     resolve: (query, _, args, context) =>
       prismaClient.$transaction(async (client) => {
-        const reviewId = +args.input.reviewId.id;
         // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
         const currentUserId = context.currentUser!.id;
+        const reviewId = +args.input.reviewId.id;
 
-        await client.review.update({
-          where: { id: +args.input.reviewId.id },
-          data: { commentCount: { increment: 1 } },
-        });
-
-        let review;
         try {
-          review = await client.comment.create({
-            ...query,
-            data: {
-              review: { connect: { id: reviewId } },
-              author: { connect: { id: currentUserId } },
-              content: args.input.content,
-            },
+          await client.review.update({
+            where: { id: reviewId },
+            data: { commentCount: { increment: 1 } },
           });
         } catch (err) {
           if (
@@ -99,7 +89,14 @@ schemaBuilder.mutationFields((t) => ({
           }
         }
 
-        return review;
+        return await client.comment.create({
+          ...query,
+          data: {
+            review: { connect: { id: reviewId } },
+            author: { connect: { id: currentUserId } },
+            content: args.input.content,
+          },
+        });
       }),
   }),
 
@@ -165,7 +162,7 @@ schemaBuilder.mutationFields((t) => ({
           data: { commentCount: { decrement: 1 } },
         });
 
-        const deletedComment = await client.comment.update({
+        return await client.comment.update({
           ...query,
           where: { id },
           data: {
@@ -174,8 +171,6 @@ schemaBuilder.mutationFields((t) => ({
             lastUpdateTime: new Date(),
           },
         });
-
-        return deletedComment;
       }),
   }),
 }));
