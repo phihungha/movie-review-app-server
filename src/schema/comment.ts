@@ -69,19 +69,14 @@ schemaBuilder.mutationFields((t) => ({
     },
     resolve: (query, _, args, context) =>
       prismaClient.$transaction(async (client) => {
-        const reviewId = +args.input.reviewId.id;
         // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
         const currentUserId = context.currentUser!.id;
+        const reviewId = +args.input.reviewId.id;
 
-        let review;
         try {
-          review = await client.comment.create({
-            ...query,
-            data: {
-              review: { connect: { id: reviewId } },
-              author: { connect: { id: currentUserId } },
-              content: args.input.content,
-            },
+          await client.review.update({
+            where: { id: reviewId },
+            data: { commentCount: { increment: 1 } },
           });
         } catch (err) {
           if (
@@ -94,12 +89,14 @@ schemaBuilder.mutationFields((t) => ({
           }
         }
 
-        client.review.update({
-          where: { id: +args.input.reviewId.id },
-          data: { commentCount: { increment: 1 } },
+        return await client.comment.create({
+          ...query,
+          data: {
+            review: { connect: { id: reviewId } },
+            author: { connect: { id: currentUserId } },
+            content: args.input.content,
+          },
         });
-
-        return review;
       }),
   }),
 
@@ -151,7 +148,21 @@ schemaBuilder.mutationFields((t) => ({
         const currentUserId = context.currentUser!.id;
         const id = +args.id.id;
 
-        const comment = await client.comment.update({
+        const comment = await client.comment.findUnique({ where: { id } });
+        if (
+          !comment ||
+          comment.authorId !== currentUserId ||
+          comment.isRemoved
+        ) {
+          throw new NotFoundError();
+        }
+
+        await client.review.update({
+          where: { id: comment.reviewId },
+          data: { commentCount: { decrement: 1 } },
+        });
+
+        return await client.comment.update({
           ...query,
           where: { id },
           data: {
@@ -160,20 +171,6 @@ schemaBuilder.mutationFields((t) => ({
             lastUpdateTime: new Date(),
           },
         });
-
-        if (comment.authorId !== currentUserId) {
-          throw new NotFoundError();
-        }
-
-        const commentCount = await client.comment.count({
-          where: { reviewId: comment.reviewId, isRemoved: false },
-        });
-        await client.review.update({
-          where: { id: comment.reviewId },
-          data: { commentCount },
-        });
-
-        return comment;
       }),
   }),
 }));

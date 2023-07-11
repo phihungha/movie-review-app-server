@@ -84,27 +84,37 @@ schemaBuilder.queryField('review', (t) =>
   })
 );
 
-async function updateAggregateData(txClient: PrismaTxClient, review: ReviewDb) {
-  const movieId = review.movieId;
-  const authorType = review.authorType;
-
-  const aggregateResult = await txClient.review.aggregate({
-    _avg: { score: true },
+async function getCurrentAggregateData(
+  txClient: PrismaTxClient,
+  movieId: number,
+  authorType: UserType
+) {
+  const result = await txClient.review.aggregate({
+    _sum: { score: true },
     _count: { id: true },
     where: { movieId, authorType },
   });
-  const aggregateScore = aggregateResult._avg.score;
-  const reviewCount = aggregateResult._count.id;
+  return { scoreSum: result._sum.score, reviewCount: result._count.id };
+}
+
+async function updateAggregateData(
+  txClient: PrismaTxClient,
+  movieId: number,
+  scoreSum: number,
+  reviewCount: number,
+  authorType: UserType
+) {
+  const newAggregateScore = scoreSum / reviewCount;
 
   let updateData;
   if (authorType === UserType.Critic) {
     updateData = {
-      criticScore: aggregateScore,
+      criticScore: newAggregateScore,
       criticReviewCount: reviewCount,
     };
   } else {
     updateData = {
-      regularScore: aggregateScore,
+      regularScore: newAggregateScore,
       regularReviewCount: reviewCount,
     };
   }
@@ -148,9 +158,13 @@ schemaBuilder.mutationFields((t) => ({
       prismaClient.$transaction(async (client) => {
         // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
         const currentUser = context.currentUser!;
+        const currentUserId = currentUser.id;
+        const movieId = +args.input.movieId.id;
+        const authorType = currentUser.userType;
+        const score = args.input.score;
 
         const existingReviews = await client.review.findMany({
-          where: { authorId: currentUser.id, movieId: +args.input.movieId.id },
+          where: { authorId: currentUserId, movieId },
         });
         if (existingReviews.length !== 0) {
           throw new AlreadyExistsError(
@@ -159,17 +173,31 @@ schemaBuilder.mutationFields((t) => ({
           );
         }
 
-        let review;
+        const { scoreSum, reviewCount } = await getCurrentAggregateData(
+          client,
+          movieId,
+          authorType
+        );
+        const newScoreSum = (scoreSum ?? 0) + score;
+        const newReviewCount = reviewCount + 1;
+        await updateAggregateData(
+          client,
+          movieId,
+          newScoreSum,
+          newReviewCount,
+          authorType
+        );
+
         try {
-          review = await client.review.create({
+          return await client.review.create({
             ...query,
             data: {
               title: args.input.title,
               content: args.input.content,
               score: args.input.score,
-              movie: { connect: { id: +args.input.movieId.id } },
-              author: { connect: { id: currentUser.id } },
-              authorType: currentUser.userType,
+              movie: { connect: { id: movieId } },
+              author: { connect: { id: currentUserId } },
+              authorType,
               externalUrl: args.input.externalUrl,
             },
           });
@@ -183,10 +211,6 @@ schemaBuilder.mutationFields((t) => ({
             throw err;
           }
         }
-
-        await updateAggregateData(client, review);
-
-        return review;
       }),
   }),
 
@@ -204,38 +228,51 @@ schemaBuilder.mutationFields((t) => ({
       prismaClient.$transaction(async (client) => {
         // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
         const currentUserId = context.currentUser!.id;
+        const reviewId = +args.id.id;
+        const newScore = args.input.score;
 
-        let review;
-        try {
-          review = await client.review.update({
-            ...query,
-            where: { id: +args.id.id },
-            data: {
-              title: args.input.title ?? undefined,
-              content: args.input.content ?? undefined,
-              score: args.input.score ?? undefined,
-              externalUrl: args.input.externalUrl,
-              lastUpdateTime: new Date(),
-            },
-          });
-        } catch (err) {
-          if (
-            err instanceof Prisma.PrismaClientKnownRequestError &&
-            err.code === 'P2025'
-          ) {
-            throw new NotFoundError();
-          } else {
-            throw err;
-          }
-        }
-
-        if (review.authorId !== currentUserId) {
+        const review = await prismaClient.review.findUnique({
+          where: { id: reviewId },
+        });
+        if (!review || review.authorId !== currentUserId) {
           throw new NotFoundError();
         }
 
-        await updateAggregateData(client, review);
+        const movieId = review.movieId;
+        const authorType = review.authorType;
 
-        return review;
+        if (newScore !== undefined && newScore !== null) {
+          const { scoreSum, reviewCount } = await getCurrentAggregateData(
+            client,
+            movieId,
+            authorType
+          );
+
+          if (!scoreSum) {
+            throw new Error('Score sum is null');
+          }
+
+          const newScoreSum = scoreSum - review.score + newScore;
+          await updateAggregateData(
+            client,
+            movieId,
+            newScoreSum,
+            reviewCount,
+            authorType
+          );
+        }
+
+        return await client.review.update({
+          ...query,
+          where: { id: reviewId },
+          data: {
+            title: args.input.title ?? undefined,
+            content: args.input.content ?? undefined,
+            score: args.input.score ?? undefined,
+            externalUrl: args.input.externalUrl,
+            lastUpdateTime: new Date(),
+          },
+        });
       }),
   }),
 
@@ -252,32 +289,42 @@ schemaBuilder.mutationFields((t) => ({
       prismaClient.$transaction(async (client) => {
         // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
         const currentUserId = context.currentUser!.id;
-        const id = +args.id.id;
+        const reviewId = +args.id.id;
 
-        let review;
-        try {
-          review = await client.review.delete({
-            ...query,
-            where: { id },
-          });
-        } catch (err) {
-          if (
-            err instanceof Prisma.PrismaClientKnownRequestError &&
-            err.code === 'P2025'
-          ) {
-            throw new NotFoundError();
-          } else {
-            throw err;
-          }
-        }
-
-        if (review.authorId !== currentUserId) {
+        const review = await prismaClient.review.findUnique({
+          where: { id: reviewId },
+        });
+        if (!review || review.authorId !== currentUserId) {
           throw new NotFoundError();
         }
 
-        await updateAggregateData(client, review);
+        const movieId = review.movieId;
+        const authorType = review.authorType;
 
-        return review;
+        const { scoreSum, reviewCount } = await getCurrentAggregateData(
+          client,
+          movieId,
+          authorType
+        );
+
+        if (!scoreSum) {
+          throw new Error('Score sum is null');
+        }
+
+        const newScoreSum = scoreSum - review.score;
+        const newReviewCount = reviewCount - 1;
+        await updateAggregateData(
+          client,
+          movieId,
+          newScoreSum,
+          newReviewCount,
+          authorType
+        );
+
+        return await client.review.delete({
+          ...query,
+          where: { id: reviewId },
+        });
       }),
   }),
 
