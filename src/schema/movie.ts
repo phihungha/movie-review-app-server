@@ -283,17 +283,17 @@ schemaBuilder.queryFields((t) => ({
             },
             releaseDate: args.releaseYear
               ? {
-                  gte: new Date(args.releaseYear, 1, 1),
-                  lte: new Date(args.releaseYear, 12, 31),
+                  gte: new Date(args.releaseYear, 0, 1),
+                  lte: new Date(args.releaseYear, 11, 31),
                 }
               : undefined,
             criticScore: {
-              lte: args.maxCriticScore ?? 10,
-              gte: args.minCriticScore ?? 0,
+              lte: args.maxCriticScore ?? undefined,
+              gte: args.minCriticScore ?? undefined,
             },
             regularScore: {
-              lte: args.maxRegularScore ?? 10,
-              gte: args.minRegularScore ?? 0,
+              lte: args.maxRegularScore ?? undefined,
+              gte: args.minRegularScore ?? undefined,
             },
           },
           orderBy: getMoviesOrderByQuery(args.sortBy, args.sortDirection),
