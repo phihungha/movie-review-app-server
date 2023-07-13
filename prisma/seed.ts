@@ -558,7 +558,7 @@ async function main() {
         'https://www.themoviedb.org/t/p/original/yKzDnjsuLhh9B4xc0vNgz1YzYsT.jpg',
       synopsis:
         'When oil is discovered in 1920s Oklahoma under Osage Nation land, the Osage people are murdered one by one—until the FBI steps in to unravel the mystery.',
-      releaseDate: new Date(2023, 10, 6),
+      releaseDate: new Date(2023, 5, 25),
       runningTime: 12360,
       genres: {
         connect: [{ name: 'Crime' }, { name: 'Drama' }, { name: 'Thriller' }],
@@ -593,7 +593,7 @@ async function main() {
         },
       },
 
-      criticScore: 9.5,
+      criticScore: 10,
       criticReviewCount: 2,
     },
   });
