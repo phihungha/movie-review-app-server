@@ -24,6 +24,7 @@ const User = schemaBuilder.prismaNode('User', {
     username: t.exposeString('username'),
     avatarUrl: t.exposeString('avatarUrl', { nullable: true }),
     name: t.exposeString('name'),
+    email: t.exposeString('email'),
     gender: t.field({
       type: Gender,
       nullable: true,
