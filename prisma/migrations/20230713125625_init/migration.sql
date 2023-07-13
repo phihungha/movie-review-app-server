@@ -86,6 +86,7 @@ CREATE TABLE "Movie" (
     "posterUrl" TEXT,
     "releaseDate" TIMESTAMP(3) NOT NULL,
     "runningTime" INTEGER NOT NULL,
+    "synopsis" TEXT,
     "regularScore" DOUBLE PRECISION,
     "regularReviewCount" INTEGER NOT NULL DEFAULT 0,
     "criticScore" DOUBLE PRECISION,

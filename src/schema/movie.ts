@@ -42,6 +42,7 @@ const Movie = schemaBuilder.prismaNode('Movie', {
       resolve: (parent) => parent.releaseDate,
     }),
     runningTime: t.exposeInt('runningTime'),
+    synopsis: t.exposeString('synopsis', { nullable: true }),
     genres: t.relation('genres'),
     productionCompanies: t.relation('productionCompanies'),
     distributedCompanies: t.relation('distributionCompanies'),
@@ -245,7 +246,7 @@ function getMoviesOrderByQuery(
 
 function calcTrendingDateLimit(): Date {
   const today = new Date();
-  today.setDate(-7);
+  today.setDate(-60);
   return today;
 }
 
