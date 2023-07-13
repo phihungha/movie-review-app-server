@@ -222,7 +222,7 @@ async function main() {
         'Armed with only one word - Tenet - and fighting for the survival of the entire world, the Protagonist journeys through a twilight world of international espionage on a mission that will unfold in something beyond real time.',
       posterUrl:
         'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/moviePosters/tenet-2020-1.webp',
-      releaseDate: new Date(2020, 9, 3),
+      releaseDate: new Date(2020, 9 - 1, 3),
       runningTime: 9053,
       genres: {
         connect: [{ name: 'Sci-Fi' }, { name: 'Action' }, { name: 'Thriller' }],
@@ -310,7 +310,7 @@ async function main() {
         'https://cinerate-movie-review-service.s3.ap-southeast-1.amazonaws.com/public/moviePosters/dune-2021-1.webp',
       synopsis:
         "Paul Atreides, a brilliant and gifted young man born into a great destiny beyond his understanding, must travel to the most dangerous planet in the universe to ensure the future of his family and his people. As malevolent forces explode into conflict over the planet's exclusive supply of the most precious resource in existence-a commodity capable of unlocking humanity's greatest potential-only those who can conquer their fear will survive.",
-      releaseDate: new Date(2021, 10, 22),
+      releaseDate: new Date(2021, 10 - 1, 22),
       runningTime: 9360,
       genres: {
         connect: [{ name: 'Sci-Fi' }, { name: 'Drama' }],
@@ -387,7 +387,7 @@ async function main() {
         'https://www.themoviedb.org/t/p/original/tcKBclNUdkas4Jis8RYYZnPdTIm.jpg',
       synopsis:
         'In an American desert town circa 1955, the itinerary of a Junior Stargazer/Space Cadet convention is spectacularly disrupted by world-changing events.',
-      releaseDate: new Date(2023, 7, 10),
+      releaseDate: new Date(2023, 7 - 1, 10),
       runningTime: 6305,
       genres: {
         connect: [{ name: 'Sci-Fi' }, { name: 'Comedy' }, { name: 'Romance' }],
@@ -476,7 +476,7 @@ async function main() {
         'https://www.themoviedb.org/t/p/original/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg',
       synopsis:
         "After reuniting with Gwen Stacy, Brooklyn's full-time, friendly neighborhood Spider-Man is catapulted across the Multiverse, where he encounters the Spider Society, a team of Spider-People charged with protecting the Multiverse’s very existence. But when the heroes clash on how to handle a new threat, Miles finds himself pitted against the other Spiders and must set out on his own to save those he loves most.",
-      releaseDate: new Date(2023, 6, 2),
+      releaseDate: new Date(2023, 6 - 1, 2),
       runningTime: 8400,
       genres: {
         connect: [
@@ -558,7 +558,7 @@ async function main() {
         'https://www.themoviedb.org/t/p/original/yKzDnjsuLhh9B4xc0vNgz1YzYsT.jpg',
       synopsis:
         'When oil is discovered in 1920s Oklahoma under Osage Nation land, the Osage people are murdered one by one—until the FBI steps in to unravel the mystery.',
-      releaseDate: new Date(2023, 5, 25),
+      releaseDate: new Date(2023, 5 - 1, 25),
       runningTime: 12360,
       genres: {
         connect: [{ name: 'Crime' }, { name: 'Drama' }, { name: 'Thriller' }],
