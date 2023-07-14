@@ -154,7 +154,7 @@ model Comment {
   id       Int    @id @default(autoincrement())
   author   User   @relation(name: "comment-author", fields: [authorId], references: [id])
   authorId String
-  review   Review @relation(fields: [reviewId], references: [id])
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
   reviewId Int
 
   postTime       DateTime  @default(now())
